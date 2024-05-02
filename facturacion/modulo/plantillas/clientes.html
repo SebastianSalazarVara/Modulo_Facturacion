@@ -1,50 +1,35 @@
-{% extends 'nav.html' %}
+{% extends 'nav.html' %} 
 
 {% block content %}
 <h1 class="text-center">Clientes</h1> 
 
-<form method="POST" class="mt-4">  <!-- Formulario para agregar o editar -->
+<!-- Formulario -->
+<form method="POST" class="mt-4">  <!-- Token CSRF -->
     {% csrf_token %}
-    <!-- Campo para DNI -->
     <div class="form-group">
         <label for="dni">DNI</label>
         <input type="text" class="form-control" id="dni" name="dni" placeholder="Ingrese el DNI" required>
     </div>
-
-    <!-- Campo para Nombre -->
     <div class="form-group">
         <label for="nombre">Nombre</label>
         <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingrese el nombre" required>
     </div>
-
-    <!-- Campo para Dirección -->
     <div class="form-group">
         <label for="direccion">Dirección</label>
         <input type="text" class="form-control" id="direccion" name="direccion" placeholder="Ingrese la dirección">
     </div>
-
-    <!-- Campo para Teléfono -->
     <div class="form-group">
         <label for="telefono">Teléfono</label>
         <input type="text" class="form-control" id="telefono" name="telefono" placeholder="Ingrese el teléfono">
     </div>
-
-    <!-- Campo para Correo Electrónico -->
     <div class="form-group">
         <label for="correo">Correo Electrónico</label>
         <input type="email" class="form-control" id="correo" name="correo" placeholder="Ingrese el correo electrónico">
     </div>
-
-    <!-- Botones diferentes según el modo -->
-    {% if editar_cliente %}  <!-- Modo edición -->
-        <button type="submit" class="btn btn-primary">Guardar Cambios</button>  
-        <a href="{% url 'clientes' %}" class="btn btn-secondary">Cancelar</a>
-    {% else %}  <!-- Modo agregar -->
-        <button type="submit" class="btn btn-primary">Registrar Cliente</button>
-    {% endif %}
+    <button type="submit" class="btn btn-primary">Registrar Cliente</button>  
 </form>
 
-<!-- Tabla para mostrar clientes -->
+<!-- Tabla -->
 <h2 class="mt-4">Lista de Clientes</h2>
 <table class="table table-striped"> 
     <thead>
@@ -54,11 +39,11 @@
             <th>Dirección</th>
             <th>Teléfono</th>
             <th>Correo Electrónico</th>
-            <th>Acciones</th> 
+            <th>Acciones</th>  <!-- Acciones editar/eliminar -->
         </tr>
     </thead>
     <tbody>
-        {% for cliente in clientes %}  <!-- Iterar para mostrar la lista de clientes -->
+        {% for cliente in clientes %}  <!-- Iterar-->
         <tr>
             <td>{{ cliente.dni }}</td>
             <td>{{ cliente.nombre }}</td>
@@ -66,9 +51,8 @@
             <td>{{ cliente.telefono }}</td>
             <td>{{ cliente.correo }}</td>
             <td>
-                <a href="{% url 'editar_cliente' cliente.id %}" class="btn btn-sm btn-warning">Editar</a>
-                <a href="{% url 'eliminar_cliente' cliente.id %}" class="btn btn-sm btn-danger"
-                   onclick="return confirm('¿Estás seguro de que quieres eliminar este cliente?')">Eliminar</a>
+                <a href="{% url 'editar_cliente' cliente.id %}" class="btn btn-sm btn-warning">Editar</a>  <!-- Botón  editar -->
+                <a href="{% url 'eliminar_cliente' cliente.id %}" class="btn btn-sm btn-danger">Eliminar</a>  <!-- Botón eliminar -->
             </td>
         </tr>
         {% endfor %}
