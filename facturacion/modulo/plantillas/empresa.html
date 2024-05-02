@@ -3,4 +3,27 @@
 {% block content %}
 <h1>Información de la Empresa</h1>
 <p>Aquí puedes ver y editar detalles de la empresa emisora de las facturas.</p>
+<form>
+    <div class="form-group">
+        <label for="companyName">Nombre de la Empresa</label>
+        <input type="text" class="form-control" id="companyName" placeholder="Ingresa el nombre de la Empresa">
+    </div>
+    <div class="form-group">
+        <label for="companyRUC">RUC</label>
+        <input type="text" class="form-control" id="companyRUC" placeholder="Ingresa el RUC">
+    </div>
+    <div class="form-group">
+        <label for="companyAddress">Dirección</label>
+        <input type="text" class="form-control" id="companyAddress" placeholder="Ingresa la dirección">
+    </div>
+    <div class="form-group">
+        <label for="companyPhone">Teléfono</label>
+        <input type="text" class="form-control" id="companyPhone" placeholder="Ingresa el número telefonico">
+    </div>
+    <div class="form-group">
+        <label for="companyImage">Imagen representativa</label>
+        <input type="file" class="form-control-file" id="companyImage">
+    </div>
+    <button type="submit" class="btn btn-primary">Guardar</button>
+</form>
 {% endblock %}
