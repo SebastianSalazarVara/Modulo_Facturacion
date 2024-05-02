@@ -3,4 +3,28 @@
 {% block content %}
 <h1>Búsqueda de Facturas</h1>
 <p>Utiliza esta sección para buscar facturas por número, cliente, fecha, o cualquier otro criterio.</p>
+
+<form method="get" action="{% url 'lista_facturas' %}">
+    <label for="estado">Estado:</label>
+    <select name="estado">
+        <option value="">Todos</option>
+        <option value="pendiente">Pendiente</option>
+        <option value="pagada">Pagada</option>
+        <!-- Otras opciones de estado -->
+    </select>
+
+    <label for="fecha_inicio">Fecha inicio:</label>
+    <input type="date" name="fecha_inicio">
+
+    <label for="fecha_fin">Fecha fin:</label>
+    <input type="date" name="fecha_fin">
+
+    <label for="nombre_cliente">Nombre del cliente:</label>
+    <input type="text" name="nombre_cliente">
+
+    <label for="usuario_creador">Usuario creador:</label>
+    <input type="text" name="usuario_creador">
+
+    <button type="submit">Buscar</button>
+</form>
 {% endblock %}
