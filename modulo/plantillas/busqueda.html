@@ -27,4 +27,37 @@
 
     <button type="submit">Buscar</button>
 </form>
+<!-- Tabla para mostrar facturas -->
+<h2 class="mt-4">Lista de Facturas</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Número de Factura</th>
+            <th>Fecha</th>
+            <th>Cliente</th>
+            <th>Estado</th>
+            <th>Total</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for factura in facturas %}  <!-- Mostrar la lista de facturas -->
+        <tr>
+            <td>{{ factura.numero }}</td>
+            <td>{{ factura.fecha }}</td>
+            <td>{{ factura.cliente }}</td>
+            <td>{{ factura.estado }}</td>
+            <td>{{ factura.total }}</td>
+            <td>
+                <a href="{% url 'editar_factura' factura.id %}" class="btn btn-sm btn-warning">Editar</a>
+                <a href="{% url 'eliminar_factura' factura.id %}" class="btn btn-sm btn-danger"
+                   onclick="return confirm('¿Estás seguro de que quieres eliminar esta factura?')">Eliminar</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 {% endblock %}
+
+
