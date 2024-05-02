@@ -1,10 +1,10 @@
-{% extends 'nav.html' %}  <!-- Extender la plantilla de navegación -->
+{% extends 'nav.html' %} 
 
 {% block content %}
-<h1 class="text-center">Clientes</h1>  <!-- Título centrado -->
+<h1 class="text-center">Clientes</h1> 
 
-<!-- Formulario para agregar nuevos clientes -->
-<form method="POST" class="mt-4">  <!-- Asegúrate de incluir el token CSRF -->
+<!-- Formulario -->
+<form method="POST" class="mt-4">  <!-- Token CSRF -->
     {% csrf_token %}
     <div class="form-group">
         <label for="dni">DNI</label>
@@ -26,12 +26,12 @@
         <label for="correo">Correo Electrónico</label>
         <input type="email" class="form-control" id="correo" name="correo" placeholder="Ingrese el correo electrónico">
     </div>
-    <button type="submit" class="btn btn-primary">Registrar Cliente</button>  <!-- Botón para registrar -->
+    <button type="submit" class="btn btn-primary">Registrar Cliente</button>  
 </form>
 
-<!-- Tabla para mostrar clientes registrados -->
+<!-- Tabla -->
 <h2 class="mt-4">Lista de Clientes</h2>
-<table class="table table-striped">  <!-- Usamos Bootstrap para estilo -->
+<table class="table table-striped"> 
     <thead>
         <tr>
             <th>DNI</th>
@@ -39,11 +39,11 @@
             <th>Dirección</th>
             <th>Teléfono</th>
             <th>Correo Electrónico</th>
-            <th>Acciones</th>  <!-- Acciones para editar/eliminar -->
+            <th>Acciones</th>  <!-- Acciones editar/eliminar -->
         </tr>
     </thead>
     <tbody>
-        {% for cliente in clientes %}  <!-- Iterar sobre la lista de clientes -->
+        {% for cliente in clientes %}  <!-- Iterar-->
         <tr>
             <td>{{ cliente.dni }}</td>
             <td>{{ cliente.nombre }}</td>
@@ -51,8 +51,8 @@
             <td>{{ cliente.telefono }}</td>
             <td>{{ cliente.correo }}</td>
             <td>
-                <a href="{% url 'editar_cliente' cliente.id %}" class="btn btn-sm btn-warning">Editar</a>  <!-- Botón para editar -->
-                <a href="{% url 'eliminar_cliente' cliente.id %}" class="btn btn-sm btn-danger">Eliminar</a>  <!-- Botón para eliminar -->
+                <a href="{% url 'editar_cliente' cliente.id %}" class="btn btn-sm btn-warning">Editar</a>  <!-- Botón  editar -->
+                <a href="{% url 'eliminar_cliente' cliente.id %}" class="btn btn-sm btn-danger">Eliminar</a>  <!-- Botón eliminar -->
             </td>
         </tr>
         {% endfor %}
