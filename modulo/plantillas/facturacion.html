@@ -1,6 +1,101 @@
 {% extends 'nav.html' %}
 
 {% block content %}
-<h1>¡Bienvenido a la página de facturación!</h1>
-<p>Aquí puedes crear y gestionar facturas.</p>
+<h1>Generar Factura</h1>
+
+<div class="row">
+    <!-- Parte Izquierda: Formulario para Cliente -->
+    <div class="col-md-6">  <!-- Columna para el formulario de cliente -->
+        <h2>Registrar Cliente</h2>
+        <form method="POST">  <!-- Usar método POST para enviar datos -->
+            {% csrf_token %}  <!-- Token CSRF para seguridad -->
+
+            <!-- Campo para DNI -->
+            <div class="form-group">
+                <label para="dni">DNI</label>
+                <input type="text" class="form-control" name="dni" id="dni" 
+                       placeholder="Ingrese el DNI del cliente"
+                       onblur="autocompletarCliente()"  <!-- Evento para autocompletar -->
+                       required>
+            </div>
+
+            <!-- Campo para Nombre -->
+            <div class="form-group">
+                <label para="nombre">Nombre</label>
+                <input type="text" class="form-control" name="nombre" id="nombre" placeholder="Ingrese el nombre">  <!-- Deshabilitar edición -->
+            </div>
+
+            <!-- Campo para Dirección -->
+            <div class="form-group">
+                <label para="direccion">Dirección</label>
+                <input type="text" class="form-control" name="direccion" id="direccion" placeholder="Ingrese la dirección">
+            </div>
+
+            <!-- Campo para Teléfono -->
+            <div class="form-group">
+                <label para="telefono">Teléfono</label>
+                <input type="text" class="form-control" name="telefono" id="telefono" placeholder="Ingrese el teléfono">
+            </div>
+
+            <!-- Campo para Correo Electrónico -->
+            <div class="form-group">
+                <label para="correo">Correo Electrónico</label>
+                <input type="email" class="form-control" name="correo" id="correo" placeholder="Ingrese el correo electrónico">
+            </div>
+        </form>
+    </div>
+    
+    <!-- Parte Derecha: Información de la Empresa -->
+    <div class="col-md-6">  <!-- Columna para información de la empresa -->
+        <h2>Datos de la Empresa</h2>
+        <p><strong>Nombre:</strong> Nombre de la Empresa</p>
+        <p><strong>RUC:</strong> 1234567890</p>
+        <p><strong>Dirección:</strong> Calle Ficticia 123, Ciudad Ficticia</p>
+        <p><strong>Teléfono:</strong> 123-456-7890</p>
+        <!-- Imagen representativa -->
+        <img src="/ruta/a/imagen.jpg" alt="Imagen de la empresa" class="img-fluid">
+    </div>
+</div>
+
+<!-- Tabla para Ingresar Productos -->
+<div class="mt-4">
+    <h2>Productos</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Nombre del Producto</th>
+                <th>Precio Unitario</th>
+                <th>Cantidad</th>
+                <th>Subtotal</th>  <!-- Cantidad * Precio Unitario -->
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Puedes agregar un loop para productos si tienes datos preexistentes -->
+            <tr>
+                <td><input type="text" class="form-control" name="codigo_producto" placeholder="Ingrese el código del producto" 
+                          onblur="autocompletarProducto()"></td>  <!-- Evento para autocompletar -->
+                <td><input type="text" class="form-control" name="nombre_producto" readonly></td>
+                <td><input type="text" class="form-control" name="precio_unitario" readonly></td>
+                <td><input type="number" class="form-control" name="cantidad_producto" value="1" min="1"></td>
+                <td><input type="text" class="form-control" name="subtotal_producto" readonly></td>  <!-- Calcular subtotal -->
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Botón para agregar más productos -->
+    <button type="button" class="btn btn-secondary" onclick="agregarProducto()">Agregar Producto</button>
+</div>
+
+<!-- Totalización -->
+<div class="mt-4">
+    <h2>Totales</h2>
+    <p><strong>Subtotal:</strong> <span id="subtotal"></span></p>  <!-- Subtotal de productos -->
+    <p><strong>Impuesto IGV (18%):</strong> <span id="impuesto_igv"></span></p>
+    <p><strong>Total a Pagar:</strong> <span id="total_pagar"></span></p>
+
+    <!-- Botón para generar la factura -->
+    <button type="submit" class="btn btn-primary">Generar Factura</button>
+</div>
+
 {% endblock %}
