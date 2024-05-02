@@ -1,6 +1,74 @@
 {% extends 'nav.html' %}
 
 {% block content %}
-<h1>Gestión de Productos/Servicios</h1>
+<h1>Gestión de Productos</h1>
 <p>Aquí puedes agregar, editar y eliminar productos o servicios, así como establecer precios y categorías.</p>
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <h2>Crear producto</h2>
+            <form>
+                <div class="form-group">
+                    <label for="productName">Nombre del producto</label>
+                    <input type="text" class="form-control" id="productName" placeholder="Ingresa el nombre del producto">
+                </div>
+                <div class="form-group">
+                    <label for="productPrice">Precio del producto</label>
+                    <input type="number" class="form-control" id="productPrice" placeholder="Ingresa el precio del producto">
+                </div>
+                <div class="form-group">
+                    <label for="productCategory">Categoria del producto</label>
+                    <select class="form-control" id="productCategory">
+                        <option value="category1">Categoria 1</option>
+                        <option value="category2">Categoria 2</option>
+                        <option value="category3">Categoria 3</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Crear</button>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <h2>Editar/Eliminar Productos</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Precio</th>
+                        <th>Categoria</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Producto 1</td>
+                        <td>S/10</td>
+                        <td>Categoria 1</td>
+                        <td>
+                            <button class="btn btn-primary">Editar</button>
+                            <button class="btn btn-danger">Eliminar</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Producto 2</td>
+                        <td>S/20</td>
+                        <td>Categoria 2</td>
+                        <td>
+                            <button class="btn btn-primary">Editar</button>
+                            <button class="btn btn-danger">Eliminar</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Producto 3</td>
+                        <td>S/30</td>
+                        <td>Categoria 3</td>
+                        <td>
+                            <button class="btn btn-primary">Editar</button>
+                            <button class="btn btn-danger">Eliminar</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}
