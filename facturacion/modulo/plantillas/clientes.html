@@ -1,6 +1,61 @@
-{% extends 'nav.html' %}
+{% extends 'nav.html' %}  <!-- Extender la plantilla de navegación -->
 
 {% block content %}
-<h1>Gestión de Clientes</h1>
-<p>Aquí puedes agregar, editar y eliminar clientes, además de ver su información de contacto.</p>
+<h1 class="text-center">Clientes</h1>  <!-- Título centrado -->
+
+<!-- Formulario para agregar nuevos clientes -->
+<form method="POST" class="mt-4">  <!-- Asegúrate de incluir el token CSRF -->
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="dni">DNI</label>
+        <input type="text" class="form-control" id="dni" name="dni" placeholder="Ingrese el DNI" required>
+    </div>
+    <div class="form-group">
+        <label for="nombre">Nombre</label>
+        <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingrese el nombre" required>
+    </div>
+    <div class="form-group">
+        <label for="direccion">Dirección</label>
+        <input type="text" class="form-control" id="direccion" name="direccion" placeholder="Ingrese la dirección">
+    </div>
+    <div class="form-group">
+        <label for="telefono">Teléfono</label>
+        <input type="text" class="form-control" id="telefono" name="telefono" placeholder="Ingrese el teléfono">
+    </div>
+    <div class="form-group">
+        <label for="correo">Correo Electrónico</label>
+        <input type="email" class="form-control" id="correo" name="correo" placeholder="Ingrese el correo electrónico">
+    </div>
+    <button type="submit" class="btn btn-primary">Registrar Cliente</button>  <!-- Botón para registrar -->
+</form>
+
+<!-- Tabla para mostrar clientes registrados -->
+<h2 class="mt-4">Lista de Clientes</h2>
+<table class="table table-striped">  <!-- Usamos Bootstrap para estilo -->
+    <thead>
+        <tr>
+            <th>DNI</th>
+            <th>Nombre</th>
+            <th>Dirección</th>
+            <th>Teléfono</th>
+            <th>Correo Electrónico</th>
+            <th>Acciones</th>  <!-- Acciones para editar/eliminar -->
+        </tr>
+    </thead>
+    <tbody>
+        {% for cliente in clientes %}  <!-- Iterar sobre la lista de clientes -->
+        <tr>
+            <td>{{ cliente.dni }}</td>
+            <td>{{ cliente.nombre }}</td>
+            <td>{{ cliente.direccion }}</td>
+            <td>{{ cliente.telefono }}</td>
+            <td>{{ cliente.correo }}</td>
+            <td>
+                <a href="{% url 'editar_cliente' cliente.id %}" class="btn btn-sm btn-warning">Editar</a>  <!-- Botón para editar -->
+                <a href="{% url 'eliminar_cliente' cliente.id %}" class="btn btn-sm btn-danger">Eliminar</a>  <!-- Botón para eliminar -->
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}
