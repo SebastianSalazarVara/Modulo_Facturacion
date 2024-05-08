@@ -1,12 +1,26 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Cliente  # Importar el modelo Cliente
-from .forms import ClienteForm  # Importar el formulario Cliente
+from .models import Cliente, Producto  # Importar el modelo Cliente
+from .forms import ClienteForm, ProductoForm  # Importar el formulario Cliente
 
 def facturacion_view(request):
     return render(request, 'facturacion.html')
 
 def productos_view(request):
-    return render(request, 'productos.html')
+    if request.method == "POST":
+        form = ProductoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            print("Producto guardado")
+            return redirect('productos')
+        else:
+            print("Errores de validación:", form.errors)
+    else:
+        form = ProductoForm()
+    productos = Producto.objects.all()
+    return render(request, 'productos.html', {
+        'form': form,
+        'productos': productos,
+    })
 
 def impuestos_view(request):
     return render(request, 'impuestos.html')
@@ -64,3 +78,44 @@ def eliminar_cliente(request, id):
     cliente = get_object_or_404(Cliente, id=id)  # Obtener el cliente o mostrar 404 si no se encuentra
     cliente.delete()  # Eliminar el cliente de la base de datos
     return redirect('clientes')  # Redirigir a la lista de clientes
+
+
+# def agregar_producto(request):
+#     if request.method == "POST":
+#         form = ProductoForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             print("Producto guardado")
+#             return redirect('productos')
+#         else:
+#             print("Errores de validación:", form.errors)
+#     else:
+#         form = ProductoForm()
+
+#     productos = Producto.objects.all()
+
+#     return render(request, 'productos.html', {
+#         'form': form,
+#         'productos': productos,
+#     })
+
+def editar_producto(request, id):
+    producto = get_object_or_404(Producto, id=id)
+    if request.method == "POST":
+        form = ProductoForm(request.POST, instance=producto)
+        if form.is_valid():
+            form.save()
+            return redirect('productos')
+    else:
+        form = ProductoForm(instance=producto)
+
+    return render(request, 'productos.html', {
+        'form': form,
+        'productos': Producto.objects.all(),
+        'editar_producto': True
+    })
+
+def eliminar_producto(request, id):
+    producto = get_object_or_404(Producto, id=id)
+    producto.delete()
+    return redirect('productos')

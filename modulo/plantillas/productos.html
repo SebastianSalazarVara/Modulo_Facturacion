@@ -7,24 +7,35 @@
     <div class="row">
         <div class="col-md-6">
             <h2>Crear producto</h2>
-            <form>
+            <form method="POST" class="mt-4">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                <div class="form-group">
+                    <label for="productCodigo">Código del producto</label>
+                    <input type="text" class="form-control" id="codigo" name="codigo" placeholder="Ingresa el código del producto"
+                    value="{{ form.codigo.value }}">
+                </div>
                 <div class="form-group">
                     <label for="productName">Nombre del producto</label>
-                    <input type="text" class="form-control" id="productName" placeholder="Ingresa el nombre del producto">
+                    <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingresa el nombre del producto"
+                    value="{{ form.nombre.value }}">
                 </div>
                 <div class="form-group">
                     <label for="productPrice">Precio del producto</label>
-                    <input type="number" class="form-control" id="productPrice" placeholder="Ingresa el precio del producto">
+                    <input type="number" class="form-control" id="precio" name="precio" placeholder="Ingresa el precio del producto"
+                    value="{{ form.precio.value }}">
                 </div>
                 <div class="form-group">
-                    <label for="productCategory">Categoria del producto</label>
-                    <select class="form-control" id="productCategory">
-                        <option value="category1">Categoria 1</option>
-                        <option value="category2">Categoria 2</option>
-                        <option value="category3">Categoria 3</option>
-                    </select>
+                    <label for="productStock">Stock del producto</label>
+                    <input type="number" class="form-control" id="stock" name="stock" placeholder="Ingresa el stock del producto"
+                    value="{{ form.stock.value }}">
                 </div>
+                {% if editar_producto %}
+                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                <a href="{% url 'productos' %}" class="btn btn-secondary">Cancelar</a>
+                {% else %}
                 <button type="submit" class="btn btn-primary">Crear</button>
+                {% endif %}
             </form>
         </div>
         <div class="col-md-6">
@@ -32,40 +43,26 @@
             <table class="table">
                 <thead>
                     <tr>
+                        <th>Código</th>
                         <th>Nombre</th>
                         <th>Precio</th>
-                        <th>Categoria</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
+                    {% for producto in productos %}
+
                     <tr>
-                        <td>Producto 1</td>
-                        <td>S/10</td>
-                        <td>Categoria 1</td>
-                        <td>
-                            <button class="btn btn-primary">Editar</button>
-                            <button class="btn btn-danger">Eliminar</button>
+                        <td scope="row">{{ producto.codigo }}</td>
+                        <td scope="row">{{ producto.nombre }}</td>
+                        <td scope="row">{{ producto.precio }}</td>
+                        <td scope="row">
+                            <a href="{% url 'editar_producto' producto.id %}" class="btn btn-primary">Editar</a>
+                            <a href="{% url 'eliminar_producto' producto.id %}" class="btn btn-danger"
+                            onclick="return confirm('¿Estás seguro de que quieres eliminar este cliente?')">Eliminar</a>
                         </td>
                     </tr>
-                    <tr>
-                        <td>Producto 2</td>
-                        <td>S/20</td>
-                        <td>Categoria 2</td>
-                        <td>
-                            <button class="btn btn-primary">Editar</button>
-                            <button class="btn btn-danger">Eliminar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Producto 3</td>
-                        <td>S/30</td>
-                        <td>Categoria 3</td>
-                        <td>
-                            <button class="btn btn-primary">Editar</button>
-                            <button class="btn btn-danger">Eliminar</button>
-                        </td>
-                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
