@@ -43,6 +43,7 @@ def empresa_view(request):
             empresa = Empresa.objects.first()
             if 'imagen' in request.FILES:
                 empresa.imagen = request.FILES['imagen']
+            empresa.ruc = form.cleaned_data['ruc']
             empresa.nombre = form.cleaned_data['nombre']
             empresa.direccion = form.cleaned_data['direccion']
             empresa.telefono = form.cleaned_data['telefono']
