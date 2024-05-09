@@ -96,21 +96,27 @@
     <!-- Botón para generar la factura -->
     <button type="button" class="btn btn-primary" onclick="generarFactura()">Generar Factura</button>
 </div>
+<script>
+    var clientes = [
+        {% for cliente in clientes %}
+            { dni: '{{ cliente.dni }}', nombre: '{{ cliente.nombre }}', direccion: '{{ cliente.direccion }}', telefono: '{{ cliente.telefono }}', correo: '{{ cliente.correo }}' },
+        {% endfor %}
+    ];
+</script>
 
 <script>
-    // Lista de productos (simulación)
     var productos = [
-        { codigo: "001", nombre: "Producto 1", precio: 10.00 },
-        { codigo: "002", nombre: "Producto 2", precio: 15.00 },
-        { codigo: "003", nombre: "Producto 3", precio: 20.00 }
+        {% for producto in productos %}
+            { codigo: '{{ producto.codigo }}', nombre: '{{ producto.nombre }}', precio: '{{ producto.precio }}', stock: '{{ producto.stock }}' },
+        {% endfor %}
     ];
 
     // Función para autocompletar la información del producto
-    function autocompletarProducto(inputElement) {
-        var codigoProducto = inputElement.value; // Obtener el código del producto ingresado
-        var row = $(inputElement).closest('tr');
+    function autocompletarProducto(codigo) {
+        var codigoProducto = codigo.value.trim();
+        var row = $(codigo).closest('tr');
 
-        // Buscar el producto por su código
+        // Buscar el producto por su código en la lista de productos
         var productoEncontrado = productos.find(producto => producto.codigo === codigoProducto);
         if (productoEncontrado) {
             // Autocompletar los campos de nombre y precio
@@ -119,8 +125,11 @@
 
             // Calcular el subtotal del producto
             calcularSubtotal(row);
+
+            // Actualizar subtotal después de autocompletar el producto
+            actualizarSubtotal();
         } else {
-            // Limpiar los campos de nombre y precio si no se encuentra el producto
+            // Limpiar los campos si no se encuentra el producto
             row.find('.nombre_producto').val('');
             row.find('.precio_unitario').val('');
 
@@ -131,11 +140,27 @@
 
     // Función para calcular el subtotal del producto
     function calcularSubtotal(row) {
-        var cantidad = row.find('.cantidad_producto').val();
-        var precioUnitario = row.find('.precio_unitario').val();
+        var cantidad = parseInt(row.find('.cantidad_producto').val());
+        var precioUnitario = parseFloat(row.find('.precio_unitario').val());
         var subtotal = cantidad * precioUnitario;
         row.find('.subtotal_producto').val(subtotal.toFixed(2));
     }
+
+    // Función para actualizar el subtotal total
+    function actualizarSubtotal() {
+        var subtotalTotal = 0;
+        $('.subtotal_producto').each(function() {
+            subtotalTotal += parseFloat($(this).val());
+        });
+        $('#subtotal').text(subtotalTotal.toFixed(2));
+    }
+
+    // Evento para actualizar el subtotal cuando cambia la cantidad
+    $(document).on('input', '.cantidad_producto', function() {
+        var row = $(this).closest('tr');
+        calcularSubtotal(row);
+        actualizarSubtotal();
+    });
 
     // Función para agregar más productos a la tabla
     function agregarProducto() {
@@ -149,32 +174,33 @@
         $('#productosTable tbody').append(newRow);
     }
 
-    // Función para generar la factura
-    function generarFactura() {
-        // Aquí debes implementar la lógica para generar la factura
-        // Puedes recopilar los datos del formulario y enviarlos al servidor mediante una solicitud AJAX.
-    }
+    // Función para autocompletar la información del cliente
     function autocompletarCliente() {
     var dniInput = document.getElementById('dni').value.trim();
-    var foundClient = clientes.find(cliente => cliente.dni === dniInput);
-    if (foundClient) {
-        document.getElementById('nombre').value = foundClient.nombre;
-        document.getElementById('direccion').value = foundClient.direccion;
-        document.getElementById('telefono').value = foundClient.telefono;
-        document.getElementById('correo').value = foundClient.correo;
+
+    // Buscar el cliente por su DNI en la lista de clientes
+    var clienteEncontrado = clientes.find(cliente => cliente.dni === dniInput);
+
+    if (clienteEncontrado) {
+        // Autocompletar los campos del formulario con la información del cliente encontrado
+        document.getElementById('nombre').value = clienteEncontrado.nombre;
+        document.getElementById('direccion').value = clienteEncontrado.direccion;
+        document.getElementById('telefono').value = clienteEncontrado.telefono;
+        document.getElementById('correo').value = clienteEncontrado.correo;
     } else {
-        // Limpiar los campos si no se encuentra el cliente
+        // Limpiar los campos si no se encuentra el cliente en la lista de clientes
         document.getElementById('nombre').value = '';
         document.getElementById('direccion').value = '';
         document.getElementById('telefono').value = '';
         document.getElementById('correo').value = '';
     }
-}
-var clientes = [
-        { dni: '12345678A', nombre: 'Juan Pérez', direccion: 'Calle 123', telefono: '123456789', correo: 'juan@example.com' },
-        { dni: '87654321B', nombre: 'María Gómez', direccion: 'Avenida 456', telefono: '987654321', correo: 'maria@example.com' }
-        // Agregar más clientes si es necesario
-    ];
+    }
+    
+    // Función para generar la factura
+    function generarFactura() {
+        // Aquí debes implementar la lógica para generar la factura
+        // Puedes recopilar los datos del formulario y enviarlos al servidor mediante una solicitud AJAX.
+    }
 </script>
 
 {% endblock %}

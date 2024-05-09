@@ -3,9 +3,12 @@ from django.http import JsonResponse, HttpResponseRedirect
 from .models import Cliente, Empresa, Producto  # Importar el modelo Cliente
 from .forms import ClienteForm, EmpresaForm, ProductoForm  # Importar el formulario Cliente
 
-def facturacion_view(request):    
-    return render(request, 'facturacion.html')
-
+def facturacion_view(request):
+    clientes = Cliente.objects.all()  # Obtener todos los clientes
+    productos = Producto.objects.all()
+    return render(request, 'facturacion.html', {'clientes': clientes, 'productos': productos})
+    
+    
 
 def productos_view(request):
     if request.method == "POST":
