@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse, HttpResponseRedirect
-from .models import Cliente, Producto  # Importar el modelo Cliente
-from .forms import ClienteForm, ProductoForm  # Importar el formulario Cliente
+from .models import Cliente, Empresa, Producto  # Importar el modelo Cliente
+from .forms import ClienteForm, EmpresaForm, ProductoForm  # Importar el formulario Cliente
 
 def facturacion_view(request):
     producto_encontrado = None
@@ -41,7 +41,27 @@ def busqueda_view(request):
     return render(request, 'busqueda.html')
 
 def empresa_view(request):
-    return render(request, 'empresa.html')
+    if request.method == "POST":
+        form = EmpresaForm(request.POST, request.FILES)
+        if form.is_valid():
+            empresa = Empresa.objects.first()
+            if 'imagen' in request.FILES:
+                empresa.imagen = request.FILES['imagen']
+            empresa.nombre = form.cleaned_data['nombre']
+            empresa.direccion = form.cleaned_data['direccion']
+            empresa.telefono = form.cleaned_data['telefono']
+            empresa.save()
+            print("Empresa Actualizada")
+            return redirect('empresa')
+        else:
+            print("Errores de validación:", form.errors)
+    else:
+        #formEmpresa= EmpresaForm(Empresa.objects.first())
+        empresa= Empresa.objects.first()
+        print(empresa)
+    return render(request, 'empresa.html', {
+        'empresa': empresa,
+    })
 
 def clientes_view(request):
     if request.method == "POST":  # Cuando se envía el formulario

@@ -3,27 +3,33 @@
 {% block content %}
 <h1>Información de la Empresa</h1>
 <p>Aquí puedes ver y editar detalles de la empresa emisora de las facturas.</p>
-<form>
+<form method="POST" class="mt-4">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
     <div class="form-group">
         <label for="companyName">Nombre de la Empresa</label>
-        <input type="text" class="form-control" id="companyName" placeholder="Ingresa el nombre de la Empresa">
+        <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingresa el nombre de la Empresa"
+        value="{{ empresa.nombre }}">
     </div>
     <div class="form-group">
         <label for="companyRUC">RUC</label>
-        <input type="text" class="form-control" id="companyRUC" placeholder="Ingresa el RUC">
+        <input type="text" class="form-control" id="ruc" name="ruc" placeholder="Ingresa el RUC"
+        value="{{ empresa.ruc }}">
     </div>
     <div class="form-group">
         <label for="companyAddress">Dirección</label>
-        <input type="text" class="form-control" id="companyAddress" placeholder="Ingresa la dirección">
+        <input type="text" class="form-control" id="direccion" name="direccion" placeholder="Ingresa la dirección"
+        value="{{ empresa.direccion }}">
     </div>
     <div class="form-group">
         <label for="companyPhone">Teléfono</label>
-        <input type="text" class="form-control" id="companyPhone" placeholder="Ingresa el número telefonico">
+        <input type="text" class="form-control" id="telefono" name="telefono" placeholder="Ingresa el número telefonico"
+        value="{{ empresa.telefono }}">
     </div>
     <div class="form-group">
         <label for="companyImage">Imagen representativa</label>
-        <input type="file" class="form-control-file" id="companyImage">
+        <input type="file" class="form-control-file" id="imagen" name="imagen">
     </div>
-    <button type="submit" class="btn btn-primary">Guardar</button>
+    <button type="submit" class="btn btn-primary">Actualizar</button>
 </form>
 {% endblock %}

@@ -18,3 +18,14 @@ class Producto(models.Model):
 
     def __str__(self):
         return f"{self.nombre} (${self.precio})"
+
+class Empresa(models.Model):
+    ruc = models.CharField(max_length=11, unique=True)  # Identificador único
+    nombre = models.CharField(max_length=100)  # Nombre de la empresa
+    direccion = models.CharField(max_length=255, blank=True, null=True)  # Dirección (opcional)
+    telefono = models.CharField(max_length=9, blank=True, null=True)  # Teléfono (opcional)
+    imagen = models.ImageField(upload_to='empresas/', blank=True, null=True)  # Imagen de la empresa (opcional)
+
+
+    def __str__(self):
+        return f"{self.nombre} ({self.ruc})"
