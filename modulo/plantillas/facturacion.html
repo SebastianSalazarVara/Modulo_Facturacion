@@ -75,9 +75,9 @@
             <tr>
                 <td><input type="text" class="form-control codigo_producto" name="codigo_producto" placeholder="Ingrese el código del producto" onblur="autocompletarProducto(this)"></td>
                 <td><input type="text" class="form-control nombre_producto" name="nombre_producto" readonly></td>
-                <td><input type="text" class="form-control precio_unitario" name="precio_unitario" readonly></td>
-                <td><input type="number" class="form-control cantidad_producto" name="cantidad_producto" value="1" min="1"></td>
-                <td><input type="text" class="form-control subtotal_producto" name="subtotal_producto" readonly></td>
+                <td><input type="text" class="form-control precio_unitario" name="precio_unitario" id="precio_unitario" readonly></td>
+                <td><input type="number" class="form-control cantidad_producto" name="cantidad_producto" id="cantidad_producto" value="1" min="1" onchange="actualizarSubtotal2()"></td>
+                <td><input type="text" class="form-control subtotal_producto" id="subtotal" name="subtotal_producto" readonly></td>
             </tr>
         </tbody>
     </table>
@@ -155,12 +155,18 @@
         $('#subtotal').text(subtotalTotal.toFixed(2));
     }
 
-    // Evento para actualizar el subtotal cuando cambia la cantidad
-    $(document).on('input', '.cantidad_producto', function() {
-        var row = $(this).closest('tr');
-        calcularSubtotal(row);
-        actualizarSubtotal();
-    });
+    function actualizarSubtotal2() {
+        console.log('Cambio en cantidad');
+        document.getElementById('subtotal').value = document.getElementById('cantidad_producto').value * document.getElementById('precio_unitario').value;
+    }
+
+    // // Evento para actualizar el subtotal cuando cambia la cantidad
+    // $(document).on('input', '.cantidad_producto', function() {
+        
+    //     var row = $(this).closest('tr');
+    //     calcularSubtotal(row);
+    //     actualizarSubtotal();
+    // });
 
     // Función para agregar más productos a la tabla
     function agregarProducto() {
