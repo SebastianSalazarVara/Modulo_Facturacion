@@ -25,7 +25,7 @@
 
         /* Al pasar el cursor */
         .nav-item:hover {
-            background-color: #ffcc00;  
+            background-color: #ffcc00;
             border-radius: 10px;  /* Bordes  */
             transition: background-color 0.3s;
         }
@@ -63,7 +63,7 @@
             <span class="navbar-toggler-icon"></span> <!-- Icono  -->
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ml-auto"> 
+            <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'facturacion' %}">Facturación</a>
                 </li>
@@ -73,12 +73,12 @@
                 <!-- <li class="nav-item">
                     <a class="nav-link" href="{% url 'impuestos' %}">Configuración de Impuestos</a>
                 </li> -->
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link" href="{% url 'informes' %}">Informes</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'busqueda' %}">Búsqueda</a>
-                </li>
+                </li> -->
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'empresa' %}">Empresa</a>
                 </li>
@@ -91,12 +91,12 @@
 
     <!-- Contenido -->
     <div class="container mt-4">
-        {% block content %}  
+        {% block content %}
         {% endblock %}
     </div>
 
     <!-- JavaScript -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script> 
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>  
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </body>
 </html>
