@@ -47,12 +47,12 @@
     <!-- Parte Derecha: Información de la Empresa -->
     <div class="col-md-6">  <!-- Columna para información de la empresa -->
         <h2>Datos de la Empresa</h2>
-        <p><strong>Nombre:</strong> Nombre de la Empresa</p>
-        <p><strong>RUC:</strong> 1234567890</p>
-        <p><strong>Dirección:</strong> Calle Ficticia 123, Ciudad Ficticia</p>
-        <p><strong>Teléfono:</strong> 123-456-7890</p>
+        <p><strong>Nombre:</strong> {{ empresa.nombre }}</p>
+        <p><strong>RUC:</strong> {{ empresa.ruc }}</p>
+        <p><strong>Dirección:</strong> {{ empresa.direccion }}</p>
+        <p><strong>Teléfono:</strong> {{ empresa.telefono }}</p>
         <!-- Imagen representativa -->
-        <img src="/ruta/a/imagen.jpg" alt="Imagen de la empresa" class="img-fluid">
+        <img src="{{ empresa.imagen.url }}" alt="Imagen de la empresa" class="img-fluid">
     </div>
 </div>
 

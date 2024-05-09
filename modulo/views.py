@@ -6,7 +6,8 @@ from .forms import ClienteForm, EmpresaForm, ProductoForm  # Importar el formula
 def facturacion_view(request):
     clientes = Cliente.objects.all()  # Obtener todos los clientes
     productos = Producto.objects.all()
-    return render(request, 'facturacion.html', {'clientes': clientes, 'productos': productos})
+    empresa = Empresa.objects.first()  # Obtener la primera empresa 
+    return render(request, 'facturacion.html', {'clientes': clientes, 'productos': productos, 'empresa': empresa})
     
     
 
