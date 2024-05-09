@@ -1,9 +1,18 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.http import JsonResponse, HttpResponseRedirect
 from .models import Cliente, Producto  # Importar el modelo Cliente
 from .forms import ClienteForm, ProductoForm  # Importar el formulario Cliente
 
 def facturacion_view(request):
-    return render(request, 'facturacion.html')
+    producto_encontrado = None
+    if request.method == "POST":
+        codigo_producto = request.POST.get('codigo_producto')
+        try:
+            producto_encontrado = Producto.objects.get(codigo=codigo_producto)
+        except Producto.DoesNotExist:
+            pass
+    return render(request, 'facturacion.html', {'producto_encontrado': producto_encontrado})
+
 
 def productos_view(request):
     if request.method == "POST":
@@ -119,3 +128,17 @@ def eliminar_producto(request, id):
     producto = get_object_or_404(Producto, id=id)
     producto.delete()
     return redirect('productos')
+
+def buscar_producto(request):
+    codigo_producto = request.GET.get('codigo_producto', None)
+    if codigo_producto:
+        try:
+            producto = Producto.objects.get(codigo=codigo_producto)
+            data = {
+                'nombre': producto.nombre,
+                'precio': producto.precio
+            }
+            return JsonResponse(data)
+        except Producto.DoesNotExist:
+            pass
+    return JsonResponse({'error': 'Producto no encontrado'}, status=404)

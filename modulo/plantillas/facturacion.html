@@ -1,99 +1,109 @@
 {% extends 'nav.html' %}
 
 {% block content %}
+<h1>¡Bienvenido a la página de facturación!</h1>
+<p>Aquí puedes crear y gestionar facturas.</p>
 <h1>Generar Factura</h1>
 
 <div class="row">
     <!-- Parte Izquierda: Formulario para Cliente -->
-    <div class="col-md-6">
+    <div class="col-md-6">  <!-- Columna para el formulario de cliente -->
         <h2>Registrar Cliente</h2>
-        <form method="POST" id="formulario">  
-            {% csrf_token %}  
+        <form method="POST">  <!-- Usar método POST para enviar datos -->
+            {% csrf_token %}  <!-- Token CSRF para seguridad -->
 
+            <!-- Campo para DNI -->
             <div class="form-group">
                 <label for="dni">DNI</label>
-                <input type="text" class="form-control" name="dni" id="dni" placeholder="Ingrese el DNI del cliente" required>
+                <input type="text" class="form-control" name="dni" id="dni" 
+                       placeholder="Ingrese el DNI del cliente"
+                       onblur="autocompletarCliente()" 
+                       required>
             </div>
 
+            <!-- Campo para Nombre -->
             <div class="form-group">
                 <label for="nombre">Nombre</label>
-                <input type="text" class="form-control" name="nombre" id="nombre" placeholder="Ingrese el nombre" required>
+                <input type="text" class="form-control" name="nombre" id="nombre" placeholder="Ingrese el nombre">  <!-- Deshabilitar edición -->
             </div>
 
+            <!-- Campo para Dirección -->
             <div class="form-group">
                 <label for="direccion">Dirección</label>
-                <input type="text" class="form-control" name="direccion" id="direccion" placeholder="Ingrese la dirección" required>
+                <input type="text" class="form-control" name="direccion" id="direccion" placeholder="Ingrese la dirección">
             </div>
 
+            <!-- Campo para Teléfono -->
             <div class="form-group">
                 <label for="telefono">Teléfono</label>
-                <input type="text" class="form-control" name="telefono" id="telefono" placeholder="Ingrese el teléfono" required>
+                <input type="text" class="form-control" name="telefono" id="telefono" placeholder="Ingrese el teléfono">
             </div>
 
+            <!-- Campo para Correo Electrónico -->
             <div class="form-group">
                 <label for="correo">Correo Electrónico</label>
-                <input type="email" class="form-control" name="correo" id="correo" placeholder="Ingrese el correo electrónico" required>
+                <input type="email" class="form-control" name="correo" id="correo" placeholder="Ingrese el correo electrónico">
             </div>
         </form>
     </div>
-    
+
     <!-- Parte Derecha: Información de la Empresa -->
-    <div class="col-md-6">
+    <div class="col-md-6">  <!-- Columna para información de la empresa -->
         <h2>Datos de la Empresa</h2>
-        <p><strong>Nombre:</strong> Empresa Ejemplo S.A.</p>
+        <p><strong>Nombre:</strong> Nombre de la Empresa</p>
         <p><strong>RUC:</strong> 1234567890</p>
-        <p><strong>Dirección:</strong> Calle Ejemplo 123, Ciudad Ejemplo </p>
+        <p><strong>Dirección:</strong> Calle Ficticia 123, Ciudad Ficticia</p>
         <p><strong>Teléfono:</strong> 123-456-7890</p>
+        <!-- Imagen representativa -->
         <img src="/ruta/a/imagen.jpg" alt="Imagen de la empresa" class="img-fluid">
     </div>
 </div>
 
-<!-- Tabla para Ingresar Productos -->
-<div class="mt-4">
-    <h2>Productos</h2>
-    <table class="table table-striped" id="tabla-productos">
+<form method="POST" action="">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="codigo_producto">Código del Producto</label>
+        <input type="text" class="form-control" id="codigo_producto" name="codigo_producto" placeholder="Ingresa el código del producto">
+    </div>
+    <button type="submit" class="btn btn-primary">Buscar</button>
+</form>
+
+{% if producto_encontrado %}
+    <table class="table">
         <thead>
             <tr>
                 <th>Código</th>
-                <th>Nombre del Producto</th>
-                <th>Precio Unitario</th>
-                <th>Cantidad</th>
-                <th>Subtotal</th>
+                <th>Nombre</th>
+                <th>Precio</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td><input type="text" class="form-control codigo-producto" placeholder="Ingrese el código del producto"></td>
-                <td><input type="text" class="form-control nombre-producto" readonly></td>
-                <td><input type="text" class="form-control precio-producto" readonly></td>
-                <td><input type="number" class="form-control cantidad-producto" value="1" min="1"></td>
-                <td><input type="text" class="form-control subtotal-producto" readonly></td>
+                <td>{{ producto_encontrado.codigo }}</td>
+                <td>{{ producto_encontrado.nombre }}</td>
+                <td>{{ producto_encontrado.precio }}</td>
             </tr>
         </tbody>
     </table>
+{% endif %}
 
-    <button type="button" class="btn btn-secondary" onclick="agregarProducto()">Agregar Producto</button>
-</div>
+<input type="hidden" id="nombre_producto" name="nombre_producto">
+<input type="hidden" id="precio_producto" name="precio_producto">
+
+
+
+
+
 
 <!-- Totalización -->
 <div class="mt-4">
     <h2>Totales</h2>
-    <p><strong>Subtotal:</strong> <span id="subtotal"></span></p>
+    <p><strong>Subtotal:</strong> <span id="subtotal"></span></p>  <!-- Subtotal de productos -->
     <p><strong>Impuesto IGV (18%):</strong> <span id="impuesto_igv"></span></p>
     <p><strong>Total a Pagar:</strong> <span id="total_pagar"></span></p>
 
-    <button type="button" class="btn btn-primary" onclick="generarFactura()">Generar Factura</button>
+    <!-- Botón para generar la factura -->
+    <button type="submit" class="btn btn-primary">Generar Factura</button>
 </div>
-
-<script>
-    function agregarProducto() {
-        // implementacion para agregar más productos a la tabla
-    }
-
-    function generarFactura() {
-        // implementacion para enviar los datos del formulario al servidor y generar la factura
-        document.getElementById('formulario').submit();
-    }
-</script>
 
 {% endblock %}
