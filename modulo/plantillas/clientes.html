@@ -3,41 +3,42 @@
 {% block content %}
 <h1 class="text-center">Clientes</h1>
 
-<form method="POST" class="mt-4">  <!-- Usar método POST para editar o agregar -->
+<form method="POST" class="mt-4" id="cliente-form">  <!-- Usar método POST para editar o agregar -->
     {% csrf_token %}
     {{ form.non_field_errors }}
 
-    <!-- Campo para DNI (prellenado y deshabilitado) -->
+    <!-- Campo para DNI -->
     <div class="form-group">
         <label for="dni">DNI</label>
         <input type="text" class="form-control" id="dni" name="dni" placeholder="Ingrese el DNI" 
-               value="{{ form.dni.value }}" readonly>  <!-- Deshabilitar edición -->
+               value="{{ form.dni.value }}">
+        <small id="dni-error" class="text-danger"></small>
     </div>
     
-    <!-- Campo para Nombre (prellenado y deshabilitado) -->
+    <!-- Campo para Nombre -->
     <div class="form-group">
-        <label para="nombre">Nombre</label>
+        <label for="nombre">Nombre</label>
         <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingrese el nombre" 
-               value="{{ form.nombre.value }}" readonly>  <!-- Deshabilitar edición -->
+               value="{{ form.nombre.value }}">
     </div>
     
-    <!-- Campo para Dirección (prellenado) -->
+    <!-- Campo para Dirección -->
     <div class="form-group">
-        <label para="direccion">Dirección</label>
+        <label for="direccion">Dirección</label>
         <input type="text" class="form-control" id="direccion" name="direccion" placeholder="Ingrese la dirección" 
                value="{{ form.direccion.value }}">
     </div>
     
-    <!-- Campo para Teléfono (prellenado) -->
+    <!-- Campo para Teléfono -->
     <div class="form-group">
-        <label para="telefono">Teléfono</label>
+        <label for="telefono">Teléfono</label>
         <input type="text" class="form-control" id="telefono" name="telefono" placeholder="Ingrese el teléfono" 
                value="{{ form.telefono.value }}">
     </div>
     
-    <!-- Campo para Correo Electrónico (prellenado) -->
+    <!-- Campo para Correo Electrónico -->
     <div class="form-group">
-        <label para="correo">Correo Electrónico</label>
+        <label for="correo">Correo Electrónico</label>
         <input type="email" class="form-control" id="correo" name="correo" placeholder="Ingrese el correo electrónico" 
                value="{{ form.correo.value }}">
     </div>
@@ -81,4 +82,18 @@
         {% endfor %}
     </tbody>
 </table>
+
+<script>
+    // Validar DNI
+    document.getElementById('dni').addEventListener('input', function () {
+        let dniInput = this.value.trim();
+        let dniError = document.getElementById('dni-error');
+
+        if (dniInput.length !== 8 || isNaN(dniInput)) {
+            dniError.textContent = 'El DNI debe ser un número de 8 dígitos.';
+        } else {
+            dniError.textContent = '';
+        }
+    });
+</script>
 {% endblock %}
