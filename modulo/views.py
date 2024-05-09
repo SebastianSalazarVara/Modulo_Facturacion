@@ -142,3 +142,4 @@ def eliminar_producto(request, id):
     producto.delete()
     return redirect('productos')
 
+
