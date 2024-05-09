@@ -41,6 +41,8 @@ def empresa_view(request):
         form = EmpresaForm(request.POST, request.FILES)
         if form.is_valid():
             empresa = Empresa.objects.first()
+            if (empresa is None):
+                empresa = Empresa()
             if 'imagen' in request.FILES:
                 empresa.imagen = request.FILES['imagen']
             empresa.ruc = form.cleaned_data['ruc']
