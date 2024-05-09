@@ -13,7 +13,7 @@
                 <div class="form-group">
                     <label for="productCodigo">Código del producto</label>
                     <input type="text" class="form-control" id="codigo" name="codigo" placeholder="Ingresa el código del producto"
-                    value="{{ form.codigo.value }}">
+                    value="{{ form.codigo.value }}" onblur="autocompletarProducto()">
                 </div>
                 <div class="form-group">
                     <label for="productName">Nombre del producto</label>
