@@ -2,14 +2,59 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse, HttpResponseRedirect
 from .models import Cliente, Empresa, Producto  # Importar el modelo Cliente
 from .forms import ClienteForm, EmpresaForm, ProductoForm  # Importar el formulario Cliente
+from .models import Producto  # Asegúrate de importar tu modelo Producto
+
+from django.shortcuts import render
+from .models import Producto
 
 def facturacion_view(request):
-    clientes = Cliente.objects.all()  # Obtener todos los clientes
-    productos = Producto.objects.all()
-    empresa = Empresa.objects.first()  # Obtener la primera empresa 
-    return render(request, 'facturacion.html', {'clientes': clientes, 'productos': productos, 'empresa': empresa})
-    
-    
+    if request.method == 'POST':
+        codigo_producto = request.POST.get('codigo_producto')
+        dni_cliente = request.POST.get('dni')
+        
+        if codigo_producto:
+            try:
+                producto_seleccionado = Producto.objects.get(codigo=codigo_producto)
+                producto_data = {
+                    'nombre': producto_seleccionado.nombre,
+                    'precio': str(producto_seleccionado.precio)
+                }
+                return JsonResponse(producto_data)
+            except Producto.DoesNotExist:
+                pass
+        
+        if dni_cliente:
+            try:
+                cliente = Cliente.objects.get(dni=dni_cliente)
+                cliente_data = {
+                    'nombre': cliente.nombre,
+                    'direccion': cliente.direccion,
+                    'telefono': cliente.telefono,
+                    'correo': cliente.correo
+                }
+                return JsonResponse(cliente_data)
+            except Cliente.DoesNotExist:
+                pass
+
+    return render(request, 'facturacion.html', {'productos_disponibles': Producto.objects.all()})
+
+def cliente_view(request):
+    if request.method == 'POST':
+        dni_cliente = request.POST.get('dni')
+        if dni_cliente:
+            try:
+                cliente = Cliente.objects.get(dni=dni_cliente)
+                cliente_data = {
+                    'nombre': cliente.nombre,
+                    'direccion': cliente.direccion,
+                    'telefono': cliente.telefono,
+                    'correo': cliente.correo
+                }
+                return JsonResponse(cliente_data)
+            except Cliente.DoesNotExist:
+                pass
+
+    return JsonResponse({'error': 'Cliente no encontrado'}, status=404)
 
 def productos_view(request):
     if request.method == "POST":
@@ -22,10 +67,13 @@ def productos_view(request):
             print("Errores de validación:", form.errors)
     else:
         form = ProductoForm()
+    
+    # Obtener todos los productos para mostrar en la tabla
     productos = Producto.objects.all()
+
     return render(request, 'productos.html', {
-        'form': form,
-        'productos': productos,
+        'form': form,  # El formulario para agregar nuevos productos
+        'productos': productos,  # La lista de productos para mostrar en la tabla
     })
 
 def impuestos_view(request):
@@ -42,11 +90,8 @@ def empresa_view(request):
         form = EmpresaForm(request.POST, request.FILES)
         if form.is_valid():
             empresa = Empresa.objects.first()
-            if (empresa is None):
-                empresa = Empresa()
             if 'imagen' in request.FILES:
                 empresa.imagen = request.FILES['imagen']
-            empresa.ruc = form.cleaned_data['ruc']
             empresa.nombre = form.cleaned_data['nombre']
             empresa.direccion = form.cleaned_data['direccion']
             empresa.telefono = form.cleaned_data['telefono']
@@ -56,8 +101,7 @@ def empresa_view(request):
         else:
             print("Errores de validación:", form.errors)
     else:
-        #formEmpresa= EmpresaForm(Empresa.objects.first())
-        empresa= Empresa.objects.first()
+        empresa = Empresa.objects.first()
         print(empresa)
     return render(request, 'empresa.html', {
         'empresa': empresa,
@@ -108,26 +152,6 @@ def eliminar_cliente(request, id):
     cliente.delete()  # Eliminar el cliente de la base de datos
     return redirect('clientes')  # Redirigir a la lista de clientes
 
-
-# def agregar_producto(request):
-#     if request.method == "POST":
-#         form = ProductoForm(request.POST)
-#         if form.is_valid():
-#             form.save()
-#             print("Producto guardado")
-#             return redirect('productos')
-#         else:
-#             print("Errores de validación:", form.errors)
-#     else:
-#         form = ProductoForm()
-
-#     productos = Producto.objects.all()
-
-#     return render(request, 'productos.html', {
-#         'form': form,
-#         'productos': productos,
-#     })
-
 def editar_producto(request, id):
     producto = get_object_or_404(Producto, id=id)
     if request.method == "POST":
@@ -138,9 +162,12 @@ def editar_producto(request, id):
     else:
         form = ProductoForm(instance=producto)
 
+    # Obtener todos los productos para mostrar en la tabla
+    productos = Producto.objects.all()
+
     return render(request, 'productos.html', {
         'form': form,
-        'productos': Producto.objects.all(),
+        'productos': productos,
         'editar_producto': True
     })
 
@@ -148,5 +175,3 @@ def eliminar_producto(request, id):
     producto = get_object_or_404(Producto, id=id)
     producto.delete()
     return redirect('productos')
-
-

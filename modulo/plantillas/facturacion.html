@@ -1,95 +1,89 @@
 {% extends 'nav.html' %}
 
 {% block content %}
+<h1>¡Bienvenido a la página de facturación!</h1>
+<p>Aquí puedes crear y gestionar facturas.</p>
 <h1>Generar Factura</h1>
 
 <div class="row">
     <!-- Parte Izquierda: Formulario para Cliente -->
-    <div class="col-md-6">  <!-- Columna para el formulario de cliente -->
+    <div class="col-md-6">
         <h2>Registrar Cliente</h2>
         <form method="POST">  <!-- Usar método POST para enviar datos -->
             {% csrf_token %}  <!-- Token CSRF para seguridad -->
 
             <!-- Campo para DNI -->
             <div class="form-group">
-                <label para="dni">DNI</label>
-                <input type="text" class="form-control" id="dni" name="dni" placeholder="Ingrese el DNI" 
-       value="{{ form.dni.value }}" onblur="autocompletarCliente()">
-
+                <label for="dni">DNI</label>
+                <input type="text" class="form-control" name="dni" id="dni" 
+                       placeholder="Ingrese el DNI del cliente"
+                       required onchange="buscarClientePorDNI(this.value)">
             </div>
 
             <!-- Campo para Nombre -->
             <div class="form-group">
-                <label para="nombre">Nombre</label>
-                <input type="text" class="form-control" name="nombre" id="nombre" placeholder="Ingrese el nombre">  <!-- Deshabilitar edición -->
+                <label for="nombre">Nombre</label>
+                <input type="text" class="form-control" name="nombre" id="nombre" placeholder="Ingrese el nombre">
             </div>
 
             <!-- Campo para Dirección -->
             <div class="form-group">
-                <label para="direccion">Dirección</label>
+                <label for="direccion">Dirección</label>
                 <input type="text" class="form-control" name="direccion" id="direccion" placeholder="Ingrese la dirección">
             </div>
 
             <!-- Campo para Teléfono -->
             <div class="form-group">
-                <label para="telefono">Teléfono</label>
+                <label for="telefono">Teléfono</label>
                 <input type="text" class="form-control" name="telefono" id="telefono" placeholder="Ingrese el teléfono">
             </div>
 
             <!-- Campo para Correo Electrónico -->
             <div class="form-group">
-                <label para="correo">Correo Electrónico</label>
+                <label for="correo">Correo Electrónico</label>
                 <input type="email" class="form-control" name="correo" id="correo" placeholder="Ingrese el correo electrónico">
             </div>
         </form>
     </div>
-    
+
     <!-- Parte Derecha: Información de la Empresa -->
     <div class="col-md-6">  <!-- Columna para información de la empresa -->
         <h2>Datos de la Empresa</h2>
-        <p><strong>Nombre:</strong> {{ empresa.nombre }}</p>
-        <p><strong>RUC:</strong> {{ empresa.ruc }}</p>
-        <p><strong>Dirección:</strong> {{ empresa.direccion }}</p>
-        <p><strong>Teléfono:</strong> {{ empresa.telefono }}</p>
+        <p><strong>Nombre:</strong> Nombre de la Empresa</p>
+        <p><strong>RUC:</strong> 1234567890</p>
+        <p><strong>Dirección:</strong> Calle Ficticia 123, Ciudad Ficticia</p>
+        <p><strong>Teléfono:</strong> 123-456-7890</p>
         <!-- Imagen representativa -->
-        <img src="E:\Proyectos\Python\SistemaFacturación\Modulo_Facturacion\empresas\carbon3.png {{ empresa.imagen.url }}" alt="Imagen de la empresa" class="img-fluid">
+        <img src="/ruta/a/imagen.jpg" alt="Imagen de la empresa" class="img-fluid">
     </div>
 </div>
-
-
 <!-- Tabla para Ingresar Productos -->
 <div class="mt-4">
     <h2>Productos</h2>
-    <table id="productosTable" class="table table-striped">
+    <form method="POST" id="productForm">
+        {% csrf_token %}<table class="table table-striped" id="productosTable">
         <thead>
             <tr>
                 <th>Código</th>
                 <th>Nombre del Producto</th>
                 <th>Precio Unitario</th>
                 <th>Cantidad</th>
-                <th>Subtotal</th>  <!-- Cantidad * Precio Unitario -->
+                <th>Subtotal</th>  
             </tr>
         </thead>
         <tbody>
-            <!-- Primera fila para ingresar producto -->
-            <tr>
-                <td><input type="text" class="form-control codigo_producto" name="codigo_producto" placeholder="Ingrese el código del producto" onblur="autocompletarProducto(this)"></td>
-                <td><input type="text" class="form-control nombre_producto" name="nombre_producto" readonly></td>
-                <td><input type="text" class="form-control precio_unitario" name="precio_unitario" id="precio_unitario" readonly></td>
-                <td><input type="number" class="form-control cantidad_producto" name="cantidad_producto" id="cantidad_producto" value="1" min="1" onchange="actualizarSubtotal2()"></td>
-                <td><input type="text" class="form-control subtotal_producto" id="subtotal" name="subtotal_producto" readonly></td>
-            </tr>
+            <!-- Las filas se agregarán dinámicamente aquí -->
         </tbody>
     </table>
-
-    <!-- Botón para agregar más productos -->
-    <button type="button" class="btn btn-secondary" onclick="agregarProducto()">Agregar Producto</button>
+    <button type="button" class="btn btn-secondary" onclick="agregarFilaProducto()">Agregar Producto</button>
+    </form>
 </div>
+
 
 <!-- Totalización -->
 <div class="mt-4">
     <h2>Totales</h2>
-    <p><strong>Subtotal:</strong> <span id="subtotal"></span></p>
+    <p><strong>Subtotal:</strong> <span id="subtotal"></span></p>  <!-- Subtotal de productos -->
     <p><strong>Impuesto IGV (18%):</strong> <span id="impuesto_igv"></span></p>
     <p><strong>Total a Pagar:</strong> <span id="total_pagar"></span></p>
 
@@ -97,116 +91,166 @@
     <button type="button" class="btn btn-primary" onclick="generarFactura()">Generar Factura</button>
 </div>
 <script>
-    var clientes = [
-        {% for cliente in clientes %}
-            { dni: '{{ cliente.dni }}', nombre: '{{ cliente.nombre }}', direccion: '{{ cliente.direccion }}', telefono: '{{ cliente.telefono }}', correo: '{{ cliente.correo }}' },
-        {% endfor %}
-    ];
-</script>
-
-<script>
-    var productos = [
-        {% for producto in productos %}
-            { codigo: '{{ producto.codigo }}', nombre: '{{ producto.nombre }}', precio: '{{ producto.precio }}', stock: '{{ producto.stock }}' },
-        {% endfor %}
-    ];
-
-    // Función para autocompletar la información del producto
-    function autocompletarProducto(codigo) {
-        var codigoProducto = codigo.value.trim();
-        var row = $(codigo).closest('tr');
-
-        // Buscar el producto por su código en la lista de productos
-        var productoEncontrado = productos.find(producto => producto.codigo === codigoProducto);
-        if (productoEncontrado) {
-            // Autocompletar los campos de nombre y precio
-            row.find('.nombre_producto').val(productoEncontrado.nombre);
-            row.find('.precio_unitario').val(productoEncontrado.precio);
-
-            // Calcular el subtotal del producto
-            calcularSubtotal(row);
-
-            // Actualizar subtotal después de autocompletar el producto
-            actualizarSubtotal();
-        } else {
-            // Limpiar los campos si no se encuentra el producto
-            row.find('.nombre_producto').val('');
-            row.find('.precio_unitario').val('');
-
-            // Limpiar el subtotal
-            row.find('.subtotal_producto').val('');
-        }
-    }
-
-    // Función para calcular el subtotal del producto
-    function calcularSubtotal(row) {
-        var cantidad = parseInt(row.find('.cantidad_producto').val());
-        var precioUnitario = parseFloat(row.find('.precio_unitario').val());
-        var subtotal = cantidad * precioUnitario;
-        row.find('.subtotal_producto').val(subtotal.toFixed(2));
-    }
-
-    // Función para actualizar el subtotal total
-    function actualizarSubtotal() {
-        var subtotalTotal = 0;
-        $('.subtotal_producto').each(function() {
-            subtotalTotal += parseFloat($(this).val());
+    function buscarClientePorDNI(dni) {
+        fetch('', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: 'dni=' + encodeURIComponent(dni)
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("nombre").value = data.nombre;
+            document.getElementById("direccion").value = data.direccion;
+            document.getElementById("telefono").value = data.telefono;
+            document.getElementById("correo").value = data.correo;
+        })
+        .catch(error => {
+            console.error('Error:', error);
         });
-        $('#subtotal').text(subtotalTotal.toFixed(2));
+    }
+    function actualizarProducto(selectElement) {
+        var codigoProducto = selectElement.value;
+        var row = selectElement.closest('tr');
+
+        fetch('', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: 'codigo_producto=' + encodeURIComponent(codigoProducto)
+        })
+        .then(response => response.json())
+        .then(data => {
+            row.querySelector(".nombre_producto").value = data.nombre;
+            row.querySelector(".precio_unitario").value = data.precio;
+            actualizarSubtotal(row); // Llama a la función para actualizar el subtotal
+            calcularTotales(); // Llama a la función para calcular los totales
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
     }
 
-    function actualizarSubtotal2() {
-        console.log('Cambio en cantidad');
-        document.getElementById('subtotal').value = document.getElementById('cantidad_producto').value * document.getElementById('precio_unitario').value;
+    function actualizarSubtotal(row) {
+        var precioUnitario = parseFloat(row.querySelector(".precio_unitario").value);
+        var cantidad = parseInt(row.querySelector(".cantidad_producto").value);
+        var subtotal = precioUnitario * cantidad;
+        row.querySelector(".subtotal_producto").value = subtotal.toFixed(2);
     }
 
-    // // Evento para actualizar el subtotal cuando cambia la cantidad
-    // $(document).on('input', '.cantidad_producto', function() {
-        
-    //     var row = $(this).closest('tr');
-    //     calcularSubtotal(row);
-    //     actualizarSubtotal();
-    // });
+    function calcularTotales() {
+        var subtotales = document.querySelectorAll(".subtotal_producto");
+        var subtotal = 0;
+        subtotales.forEach(function(element) {
+            subtotal += parseFloat(element.value);
+        });
 
-    // Función para agregar más productos a la tabla
-    function agregarProducto() {
+        var impuestoIGV = subtotal * 0.18;
+        var totalPagar = subtotal + impuestoIGV;
+
+        document.getElementById("subtotal").innerText = subtotal.toFixed(2);
+        document.getElementById("impuesto_igv").innerText = impuestoIGV.toFixed(2);
+        document.getElementById("total_pagar").innerText = totalPagar.toFixed(2);
+    }
+
+    function generarFactura() {
+        var productos = obtenerProductos(); // Función para obtener los datos de los productos de las filas de la tabla
+        var cliente = obtenerDatosCliente(); // Función para obtener los datos del cliente del formulario
+
+        // Crear la factura como un string HTML
+        var facturaHTML = '<h2>Factura</h2>' +
+                          '<h3>Datos del Cliente</h3>' +
+                          '<p><strong>DNI:</strong> ' + cliente.dni + '</p>' +
+                          '<p><strong>Nombre:</strong> ' + cliente.nombre + '</p>' +
+                          '<p><strong>Dirección:</strong> ' + cliente.direccion + '</p>' +
+                          '<p><strong>Teléfono:</strong> ' + cliente.telefono + '</p>' +
+                          '<p><strong>Correo Electrónico:</strong> ' + cliente.correo + '</p>' +
+                          '<h3>Productos</h3>' +
+                          '<table>' +
+                          '<thead>' +
+                          '<tr>' +
+                          '<th>Código</th>' +
+                          '<th>Nombre</th>' +
+                          '<th>Precio Unitario</th>' +
+                          '<th>Cantidad</th>' +
+                          '<th>Subtotal</th>' +
+                          '</tr>' +
+                          '</thead>' +
+                          '<tbody>';
+
+        productos.forEach(function(producto) {
+            facturaHTML += '<tr>' +
+                           '<td>' + producto.codigo + '</td>' +
+                           '<td>' + producto.nombre + '</td>' +
+                           '<td>' + producto.precio_unitario + '</td>' +
+                           '<td>' + producto.cantidad + '</td>' +
+                           '<td>' + producto.subtotal + '</td>' +
+                           '</tr>';
+        });
+
+        // Calcular totales
+        var subtotal = parseFloat(document.getElementById("subtotal").innerText);
+        var impuestoIGV = parseFloat(document.getElementById("impuesto_igv").innerText);
+        var totalPagar = parseFloat(document.getElementById("total_pagar").innerText);
+
+        facturaHTML += '</tbody>' +
+                       '</table>' +
+                       '<h3>Totales</h3>' +
+                       '<p><strong>Subtotal:</strong> ' + subtotal.toFixed(2) + '</p>' +
+                       '<p><strong>Impuesto IGV (18%):</strong> ' + impuestoIGV.toFixed(2) + '</p>' +
+                       '<p><strong>Total a Pagar:</strong> ' + totalPagar.toFixed(2) + '</p>';
+
+        // Mostrar la factura en una ventana emergente o en algún elemento de la página
+        var facturaWindow = window.open('', 'Factura', 'width=600,height=400');
+        facturaWindow.document.write(facturaHTML);
+    }
+
+    function obtenerDatosCliente() {
+        return {
+            nombre: document.getElementById("nombre").value,
+            dni: document.getElementById("dni").value,
+            direccion: document.getElementById("direccion").value,
+            telefono: document.getElementById("telefono").value,
+            correo: document.getElementById("correo").value
+        };
+    }    function obtenerProductos() {
+        var productos = [];
+        var filas = document.querySelectorAll("#productosTable tbody tr");
+        filas.forEach(function(fila) {
+            var producto = {
+                codigo: fila.querySelector(".codigo_producto").value,
+                nombre: fila.querySelector(".nombre_producto").value,
+                precio_unitario: parseFloat(fila.querySelector(".precio_unitario").value),
+                cantidad: parseInt(fila.querySelector(".cantidad_producto").value),
+                subtotal: parseFloat(fila.querySelector(".subtotal_producto").value)
+            };
+            productos.push(producto);
+        });
+        return productos;
+    }
+
+    function agregarFilaProducto() {
         var newRow = '<tr>' +
-            '<td><input type="text" class="form-control codigo_producto" name="codigo_producto" placeholder="Ingrese el código del producto" onblur="autocompletarProducto(this)"></td>' +
+            '<td>' +
+                '<select class="form-control codigo_producto" name="codigo_producto" onchange="actualizarProducto(this)">' +
+                    '<option value="">Selecciona un código</option>' +
+                    '{% for producto in productos_disponibles %}' +
+                        '<option value="{{ producto.codigo }}">{{ producto.codigo }}</option>' +
+                    '{% endfor %}' +
+                '</select>' +
+            '</td>' +
             '<td><input type="text" class="form-control nombre_producto" name="nombre_producto" readonly></td>' +
             '<td><input type="text" class="form-control precio_unitario" name="precio_unitario" readonly></td>' +
-            '<td><input type="number" class="form-control cantidad_producto" name="cantidad_producto" value="1" min="1"></td>' +
+            '<td><input type="number" class="form-control cantidad_producto" name="cantidad_producto" value="1" min="1" onchange="actualizarSubtotal(this.parentNode.parentNode); calcularTotales();"></td>' +
             '<td><input type="text" class="form-control subtotal_producto" name="subtotal_producto" readonly></td>' +
             '</tr>';
         $('#productosTable tbody').append(newRow);
     }
-
-    // Función para autocompletar la información del cliente
-    function autocompletarCliente() {
-    var dniInput = document.getElementById('dni').value.trim();
-
-    // Buscar el cliente por su DNI en la lista de clientes
-    var clienteEncontrado = clientes.find(cliente => cliente.dni === dniInput);
-
-    if (clienteEncontrado) {
-        // Autocompletar los campos del formulario con la información del cliente encontrado
-        document.getElementById('nombre').value = clienteEncontrado.nombre;
-        document.getElementById('direccion').value = clienteEncontrado.direccion;
-        document.getElementById('telefono').value = clienteEncontrado.telefono;
-        document.getElementById('correo').value = clienteEncontrado.correo;
-    } else {
-        // Limpiar los campos si no se encuentra el cliente en la lista de clientes
-        document.getElementById('nombre').value = '';
-        document.getElementById('direccion').value = '';
-        document.getElementById('telefono').value = '';
-        document.getElementById('correo').value = '';
-    }
-    }
-    
-    // Función para generar la factura
-    function generarFactura() {
-        // Aquí debes implementar la lógica para generar la factura
-        // Puedes recopilar los datos del formulario y enviarlos al servidor mediante una solicitud AJAX.
-    }
 </script>
+
 
 {% endblock %}
