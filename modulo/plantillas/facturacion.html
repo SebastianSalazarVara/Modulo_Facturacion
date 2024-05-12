@@ -1,6 +1,7 @@
 {% extends 'nav.html' %}
 
 {% block content %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <h1>¡Bienvenido a la página de facturación!</h1>
 <p>Aquí puedes crear y gestionar facturas.</p>
 <h1>Generar Factura</h1>
@@ -9,7 +10,8 @@
     <!-- Parte Izquierda: Formulario para Cliente -->
     <div class="col-md-6">
         <h2>Registrar Cliente</h2>
-        <form method="POST">  <!-- Usar método POST para enviar datos -->
+        <form method="POST" action="{% url 'guardar_factura' %}" id="facturaForm">
+            <!-- Usar método POST para enviar datos -->
             {% csrf_token %}  <!-- Token CSRF para seguridad -->
 
             <!-- Campo para DNI -->
@@ -49,13 +51,22 @@
     <!-- Parte Derecha: Información de la Empresa -->
     <div class="col-md-6">  <!-- Columna para información de la empresa -->
         <h2>Datos de la Empresa</h2>
-        <p><strong>Nombre:</strong> Nombre de la Empresa</p>
-        <p><strong>RUC:</strong> 1234567890</p>
-        <p><strong>Dirección:</strong> Calle Ficticia 123, Ciudad Ficticia</p>
-        <p><strong>Teléfono:</strong> 123-456-7890</p>
+        <p><strong>Nombre:</strong> <span id="nombre_empresa">{{ empresa.nombre }}</span></p>
+        <p><strong>RUC:</strong> <span id="ruc_empresa">{{ empresa.ruc }}</span></p>
+        <p><strong>Dirección:</strong> <span id="direccion_empresa">{{ empresa.direccion }}</span></p>
+        <p><strong>Teléfono:</strong> <span id="telefono_empresa">{{ empresa.telefono }}</span></p>
         <!-- Imagen representativa -->
-        <img src="/ruta/a/imagen.jpg" alt="Imagen de la empresa" class="img-fluid">
+        {% if empresa.imagen %}
+            <img src="{{ empresa.imagen.url }}" alt="Imagen de la empresa" class="img-fluid" id="imagen_empresa">
+        {% else %}
+            <!-- Aquí puedes colocar una imagen por defecto si no hay imagen cargada -->
+            <p>No hay imagen disponible</p>
+        {% endif %}
     </div>
+
+
+
+
 </div>
 <!-- Tabla para Ingresar Productos -->
 <div class="mt-4">
@@ -88,9 +99,17 @@
     <p><strong>Total a Pagar:</strong> <span id="total_pagar"></span></p>
 
     <!-- Botón para generar la factura -->
-    <button type="button" class="btn btn-primary" onclick="generarFactura()">Generar Factura</button>
+    <button type="button" class="btn btn-primary" onclick="guardarFactura()">Generar Factura</button>
+
 </div>
 <script>
+    document.getElementById("nombre_empresa").innerText = "{{ empresa.nombre }}";
+    document.getElementById("ruc_empresa").innerText = "{{ empresa.ruc }}";
+    document.getElementById("direccion_empresa").innerText = "{{ empresa.direccion }}";
+    document.getElementById("telefono_empresa").innerText = "{{ empresa.telefono }}";
+    document.getElementById("imagen_empresa").src = "{{ empresa.imagen.url }}";
+
+
     function buscarClientePorDNI(dni) {
         fetch('', {
             method: 'POST',
@@ -111,6 +130,7 @@
             console.error('Error:', error);
         });
     }
+    
     function actualizarProducto(selectElement) {
         var codigoProducto = selectElement.value;
         var row = selectElement.closest('tr');
@@ -125,9 +145,13 @@
         })
         .then(response => response.json())
         .then(data => {
+            // Actualizar campos de la fila con los datos del producto
             row.querySelector(".nombre_producto").value = data.nombre;
             row.querySelector(".precio_unitario").value = data.precio;
-            actualizarSubtotal(row); // Llama a la función para actualizar el subtotal
+
+            // Llamar a la función para actualizar el subtotal
+            actualizarSubtotal(row);
+
             calcularTotales(); // Llama a la función para calcular los totales
         })
         .catch(error => {
@@ -139,75 +163,99 @@
         var precioUnitario = parseFloat(row.querySelector(".precio_unitario").value);
         var cantidad = parseInt(row.querySelector(".cantidad_producto").value);
         var subtotal = precioUnitario * cantidad;
-        row.querySelector(".subtotal_producto").value = subtotal.toFixed(2);
+        if (!isNaN(subtotal)) {
+            row.querySelector(".subtotal_producto").value = subtotal.toFixed(2);
+        } else {
+            row.querySelector(".subtotal_producto").value = "0.00";
+        }
     }
 
     function calcularTotales() {
         var subtotales = document.querySelectorAll(".subtotal_producto");
         var subtotal = 0;
+        
         subtotales.forEach(function(element) {
-            subtotal += parseFloat(element.value);
+            subtotal += parseFloat(element.value || 0); // Utiliza element.value para obtener el valor del subtotal
         });
 
-        var impuestoIGV = subtotal * 0.18;
-        var totalPagar = subtotal + impuestoIGV;
+        var totalPagar = subtotal; // Total a pagar es la suma de los subtotales
 
-        document.getElementById("subtotal").innerText = subtotal.toFixed(2);
+        var impuestoIGV = totalPagar / 1.18 * 0.18; // Calcular el IGV
+        var subtotalSinIGV = totalPagar - impuestoIGV; // Calcular el subtotal sin IGV
+
+        document.getElementById("subtotal").innerText = subtotalSinIGV.toFixed(2);
         document.getElementById("impuesto_igv").innerText = impuestoIGV.toFixed(2);
         document.getElementById("total_pagar").innerText = totalPagar.toFixed(2);
     }
+    
 
-    function generarFactura() {
-        var productos = obtenerProductos(); // Función para obtener los datos de los productos de las filas de la tabla
-        var cliente = obtenerDatosCliente(); // Función para obtener los datos del cliente del formulario
+    // Función para generar la factura en formato HTML
+    function guardarFactura() {
+        var cliente = obtenerDatosCliente();
+        var productos = obtenerProductos();
+        var datosFactura = {
+            cliente: cliente,
+            productos: productos
+        };
 
-        // Crear la factura como un string HTML
-        var facturaHTML = '<h2>Factura</h2>' +
-                          '<h3>Datos del Cliente</h3>' +
-                          '<p><strong>DNI:</strong> ' + cliente.dni + '</p>' +
-                          '<p><strong>Nombre:</strong> ' + cliente.nombre + '</p>' +
-                          '<p><strong>Dirección:</strong> ' + cliente.direccion + '</p>' +
-                          '<p><strong>Teléfono:</strong> ' + cliente.telefono + '</p>' +
-                          '<p><strong>Correo Electrónico:</strong> ' + cliente.correo + '</p>' +
-                          '<h3>Productos</h3>' +
-                          '<table>' +
-                          '<thead>' +
-                          '<tr>' +
-                          '<th>Código</th>' +
-                          '<th>Nombre</th>' +
-                          '<th>Precio Unitario</th>' +
-                          '<th>Cantidad</th>' +
-                          '<th>Subtotal</th>' +
-                          '</tr>' +
-                          '</thead>' +
-                          '<tbody>';
-
-        productos.forEach(function(producto) {
-            facturaHTML += '<tr>' +
-                           '<td>' + producto.codigo + '</td>' +
-                           '<td>' + producto.nombre + '</td>' +
-                           '<td>' + producto.precio_unitario + '</td>' +
-                           '<td>' + producto.cantidad + '</td>' +
-                           '<td>' + producto.subtotal + '</td>' +
-                           '</tr>';
+        // Enviar los datos al servidor mediante una solicitud fetch
+        fetch('/guardar_factura', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(datosFactura)
+        })
+        .then(response => {
+            if (response.ok) {
+                // Si la respuesta es exitosa, mostrar la factura generada
+                return response.json();
+            } else {
+                // Si hay un error, mostrar un mensaje de error
+                console.error('Error al guardar la factura:', response.statusText);
+                // Puedes mostrar un mensaje de error al usuario si lo deseas
+            }
+        })
+        .then(data => {
+            // Mostrar la factura generada
+            mostrarFactura(data);
+        })
+        .catch(error => {
+            console.error('Error al procesar la solicitud:', error);
+            // Puedes mostrar un mensaje de error al usuario si lo deseas
         });
+    }
 
-        // Calcular totales
-        var subtotal = parseFloat(document.getElementById("subtotal").innerText);
-        var impuestoIGV = parseFloat(document.getElementById("impuesto_igv").innerText);
-        var totalPagar = parseFloat(document.getElementById("total_pagar").innerText);
+    function mostrarFactura(data) {
+        var facturaHTML = '<h2>Factura Generada</h2>' +
+                        '<p><strong>Número de Factura:</strong> ' + data.numero_factura + '</p>' +
+                        '<h3>Datos del Cliente:</h3>' +
+                        '<p><strong>Nombre:</strong> ' + data.cliente.nombre + '</p>' +
+                        '<p><strong>Dirección:</strong> ' + data.cliente.direccion + '</p>' +
+                        '<p><strong>Teléfono:</strong> ' + data.cliente.telefono + '</p>' +
+                        '<p><strong>Correo Electrónico:</strong> ' + data.cliente.correo + '</p>' +
+                        '<h3>Datos de la Empresa:</h3>' +
+                        '<p><strong>Nombre:</strong> ' + data.empresa.nombre + '</p>' +
+                        '<p><strong>RUC:</strong> ' + data.empresa.ruc + '</p>' +
+                        '<p><strong>Dirección:</strong> ' + data.empresa.direccion + '</p>' +
+                        '<p><strong>Teléfono:</strong> ' + data.empresa.telefono + '</p>' +
+                        '<h3>Productos:</h3>' +
+                        '<ul>';
+        data.productos.forEach(function(producto) {
+            facturaHTML += '<li>' + producto.nombre + ': ' + producto.cantidad + ' x ' + producto.precio_unitario + '</li>';
+        });
+        facturaHTML += '</ul>' +
+                    '<h3>Totales:</h3>' +
+                    '<p><strong>Subtotal:</strong> ' + data.subtotal + '</p>' +
+                    '<p><strong>Impuesto IGV (18%):</strong> ' + data.impuesto_igv + '</p>' +
+                    '<p><strong>Total a Pagar:</strong> ' + data.total_pagar + '</p>';
 
-        facturaHTML += '</tbody>' +
-                       '</table>' +
-                       '<h3>Totales</h3>' +
-                       '<p><strong>Subtotal:</strong> ' + subtotal.toFixed(2) + '</p>' +
-                       '<p><strong>Impuesto IGV (18%):</strong> ' + impuestoIGV.toFixed(2) + '</p>' +
-                       '<p><strong>Total a Pagar:</strong> ' + totalPagar.toFixed(2) + '</p>';
-
-        // Mostrar la factura en una ventana emergente o en algún elemento de la página
-        var facturaWindow = window.open('', 'Factura', 'width=600,height=400');
+        // Muestra la factura en una ventana emergente
+        var facturaWindow = window.open('', 'Factura Generada', 'width=600,height=400');
         facturaWindow.document.write(facturaHTML);
     }
+
 
     function obtenerDatosCliente() {
         return {

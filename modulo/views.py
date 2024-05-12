@@ -1,11 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse, HttpResponseRedirect
-from .models import Cliente, Empresa, Producto  # Importar el modelo Cliente
+from .models import Cliente, Empresa, Producto, Factura  # Importar el modelo Cliente
 from .forms import ClienteForm, EmpresaForm, ProductoForm  # Importar el formulario Cliente
-from .models import Producto  # Asegúrate de importar tu modelo Producto
 
 from django.shortcuts import render
-from .models import Producto
+
 
 def facturacion_view(request):
     if request.method == 'POST':
@@ -36,7 +35,9 @@ def facturacion_view(request):
             except Cliente.DoesNotExist:
                 pass
 
-    return render(request, 'facturacion.html', {'productos_disponibles': Producto.objects.all()})
+    empresa = Empresa.objects.first()  # Obtén la empresa desde la base de datos
+    productos_disponibles = Producto.objects.all()  # Obtén todos los productos disponibles
+    return render(request, 'facturacion.html', {'empresa': empresa, 'productos_disponibles': productos_disponibles})
 
 def cliente_view(request):
     if request.method == 'POST':
@@ -76,36 +77,33 @@ def productos_view(request):
         'productos': productos,  # La lista de productos para mostrar en la tabla
     })
 
-def impuestos_view(request):
-    return render(request, 'impuestos.html')
-
-def informes_view(request):
-    return render(request, 'informes.html')
-
 def busqueda_view(request):
     return render(request, 'busqueda.html')
 
 def empresa_view(request):
+    empresa = Empresa.objects.first()
+    
     if request.method == "POST":
-        form = EmpresaForm(request.POST, request.FILES)
+        form = EmpresaForm(request.POST, request.FILES, instance=empresa)
         if form.is_valid():
-            empresa = Empresa.objects.first()
+            empresa = form.save(commit=False)
             if 'imagen' in request.FILES:
                 empresa.imagen = request.FILES['imagen']
+            empresa.ruc = form.cleaned_data['ruc']  # Asegúrate de obtener el valor del campo 'ruc'
             empresa.nombre = form.cleaned_data['nombre']
             empresa.direccion = form.cleaned_data['direccion']
             empresa.telefono = form.cleaned_data['telefono']
             empresa.save()
-            print("Empresa Actualizada")
+            print("Empresa Guardada/Actualizada correctamente")
             return redirect('empresa')
         else:
             print("Errores de validación:", form.errors)
     else:
-        empresa = Empresa.objects.first()
-        print(empresa)
-    return render(request, 'empresa.html', {
-        'empresa': empresa,
-    })
+        form = EmpresaForm(instance=empresa)
+        
+    return render(request, 'empresa.html', {'form': form, 'empresa': empresa})
+
+
 
 def clientes_view(request):
     if request.method == "POST":  # Cuando se envía el formulario
@@ -175,3 +173,25 @@ def eliminar_producto(request, id):
     producto = get_object_or_404(Producto, id=id)
     producto.delete()
     return redirect('productos')
+
+def guardar_factura(request):
+    if request.method == 'POST':
+        # Obtener datos del cliente, productos y fecha
+        cliente_data = json.loads(request.POST.get('cliente'))
+        productos_data = json.loads(request.POST.get('productos'))
+        fecha = request.POST.get('fecha')
+
+        # Guardar la factura en la base de datos
+        factura = Factura(cliente=cliente_data, fecha=fecha)
+        factura.save()
+
+        # Guardar los productos asociados a la factura
+        for producto_data in productos_data:
+            producto = Producto.objects.get(pk=producto_data['id'])
+            factura.productos.add(producto)
+
+        # Devolver el número de factura generado
+        numero_factura = factura.id
+        return JsonResponse({'numero_factura': numero_factura})
+    else:
+        return JsonResponse({'error': 'Método no permitido'})
