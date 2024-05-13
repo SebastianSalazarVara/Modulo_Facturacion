@@ -78,7 +78,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',  # Conector para MySQL
         'NAME': 'DBModulo',  # Cambia esto por el nombre de tu base de datos
         'USER': 'root',               # Usuario con acceso a la base de datos
-        'PASSWORD': 'contraseña',              # Contraseña del usuario
+        'PASSWORD': '',              # Contraseña del usuario
         'HOST': 'localhost',                   # Si MySQL está en tu máquina local
         'PORT': '3306',                         # Puerto predeterminado de MySQL
     }

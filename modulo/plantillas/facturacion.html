@@ -192,14 +192,16 @@
     // Función para generar la factura en formato HTML
     function guardarFactura() {
         var cliente = obtenerDatosCliente();
+        console.log(cliente);
         var productos = obtenerProductos();
+        console.log(productos);
         var datosFactura = {
             cliente: cliente,
             productos: productos
         };
 
         // Enviar los datos al servidor mediante una solicitud fetch
-        fetch('/guardar_factura', {
+        fetch('/modulo/guardar_factura/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

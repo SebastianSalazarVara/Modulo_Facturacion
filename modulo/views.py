@@ -1,16 +1,18 @@
+import json
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse, HttpResponseRedirect
 from .models import Cliente, Empresa, Producto, Factura  # Importar el modelo Cliente
 from .forms import ClienteForm, EmpresaForm, ProductoForm  # Importar el formulario Cliente
 
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
 
 
 def facturacion_view(request):
     if request.method == 'POST':
         codigo_producto = request.POST.get('codigo_producto')
         dni_cliente = request.POST.get('dni')
-        
+
         if codigo_producto:
             try:
                 producto_seleccionado = Producto.objects.get(codigo=codigo_producto)
@@ -21,7 +23,7 @@ def facturacion_view(request):
                 return JsonResponse(producto_data)
             except Producto.DoesNotExist:
                 pass
-        
+
         if dni_cliente:
             try:
                 cliente = Cliente.objects.get(dni=dni_cliente)
@@ -68,7 +70,7 @@ def productos_view(request):
             print("Errores de validación:", form.errors)
     else:
         form = ProductoForm()
-    
+
     # Obtener todos los productos para mostrar en la tabla
     productos = Producto.objects.all()
 
@@ -82,7 +84,7 @@ def busqueda_view(request):
 
 def empresa_view(request):
     empresa = Empresa.objects.first()
-    
+
     if request.method == "POST":
         form = EmpresaForm(request.POST, request.FILES, instance=empresa)
         if form.is_valid():
@@ -100,7 +102,7 @@ def empresa_view(request):
             print("Errores de validación:", form.errors)
     else:
         form = EmpresaForm(instance=empresa)
-        
+
     return render(request, 'empresa.html', {'form': form, 'empresa': empresa})
 
 
@@ -174,24 +176,54 @@ def eliminar_producto(request, id):
     producto.delete()
     return redirect('productos')
 
+# def guardar_factura(request):
+#     print("Ingreso a guardar_factura")
+#     if request.method == 'POST':
+
+#         # Obtener datos del cliente, productos y fecha
+#         cliente_id = request.POST.get('datosFactura')
+#         print(cliente_id)
+#         #cliente_data = json.loads(request.POST.get('cliente')) if request.POST.get('cliente') else {}
+
+#         productos_data = json.loads(request.POST.get('productos')) if request.POST.get('productos') else []
+#         fecha = request.POST.get('fecha') if request.POST.get('fecha') else ''
+
+#         # Guardar la factura en la base de datos
+#         factura = Factura(cliente=cliente_data, fecha=fecha)
+#         factura.save()
+
+#         # Guardar los productos asociados a la factura
+#         for producto_data in productos_data:
+#             producto = Producto.objects.get(pk=producto_data['id'])
+#             factura.productos.add(producto)
+
+#         # Devolver el número de factura generado
+#         numero_factura = factura.id
+#         return JsonResponse({'numero_factura': numero_factura})
+#     else:
+#         return JsonResponse({'error': 'Método no permitido'})
+
+@csrf_exempt
 def guardar_factura(request):
+    print("Ingreso a guardar_factura")
     if request.method == 'POST':
-        # Obtener datos del cliente, productos y fecha
-        cliente_data = json.loads(request.POST.get('cliente'))
-        productos_data = json.loads(request.POST.get('productos'))
-        fecha = request.POST.get('fecha')
+        print("Ingreso al primer if")
+        body_unicode = request.body.decode('utf-8')
+        body_data = json.loads(body_unicode)
 
-        # Guardar la factura en la base de datos
-        factura = Factura(cliente=cliente_data, fecha=fecha)
-        factura.save()
-
-        # Guardar los productos asociados a la factura
-        for producto_data in productos_data:
-            producto = Producto.objects.get(pk=producto_data['id'])
-            factura.productos.add(producto)
-
-        # Devolver el número de factura generado
-        numero_factura = factura.id
-        return JsonResponse({'numero_factura': numero_factura})
-    else:
-        return JsonResponse({'error': 'Método no permitido'})
+        cliente_id = body_data.get('cliente').get('dni')
+        if cliente_id:
+            print("Ingreso al iegundo if")
+            try:
+                cliente_data = Cliente.objects.get(dni=cliente_id)
+                factura = Factura(cliente=cliente_data)
+                factura.save()
+                for producto_data in body_data.get('productos'):
+                    producto = Producto.objects.get(codigo=producto_data.get('codigo'))
+                    print(producto)
+                    factura.productos.add(producto)
+                return JsonResponse({'numero_factura': factura.id})
+            except Cliente.DoesNotExist:
+                return JsonResponse({'error': 'Cliente no encontrado'}, status=404)
+        else:
+            return JsonResponse({'error': 'No se proporcionó cliente'}, status=400)
