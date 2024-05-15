@@ -1,7 +1,7 @@
 import json
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse, HttpResponseRedirect
-from .models import Cliente, Empresa, Producto, Factura  # Importar el modelo Cliente
+from .models import Cliente, Empresa, FacturaProducto, Producto, Factura  # Importar el modelo Cliente
 from .forms import ClienteForm, EmpresaForm, ProductoForm  # Importar el formulario Cliente
 
 from django.shortcuts import render
@@ -79,8 +79,43 @@ def productos_view(request):
         'productos': productos,  # La lista de productos para mostrar en la tabla
     })
 
+def facturas_view(request):
+    if request.method == 'GET':
+        facturas = Factura.objects.all()
+        return render(request, 'facturas.html', {'facturas': facturas})
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+    
+def detalle_factura(request, id):
+    factura = get_object_or_404(Factura, id=id)
+    datosFactura= FacturaProducto.objects.filter(factura=factura)
+    datosProductos = []
+    for dato in datosFactura:
+        datosProductos.append({
+            'nombre': dato.producto.nombre,
+            'precio': dato.producto.precio,
+            'cantidad': dato.cantidad,
+            'subtotal': dato.subtotal
+        })
+    factura_data = {
+        'id': factura.id,
+        'cliente': factura.cliente.nombre,
+        'fecha': factura.fecha,
+        'subtotal': factura.subtotal,
+        'igv': factura.igv,
+        'total': factura.total
+    }
+    return render(request, 'detalle_factura.html', {'factura': factura_data,
+                                                    'productos': datosProductos})
+
 def busqueda_view(request):
+    if request.method == 'POST':
+        busqueda = request.POST.get('busqueda')
+        if busqueda:
+            productos = Producto.objects.filter(nombre__icontains=busqueda)
+            return render(request, 'busqueda.html', {'productos': productos, 'busqueda': busqueda})
     return render(request, 'busqueda.html')
+    
 
 def empresa_view(request):
     empresa = Empresa.objects.first()
@@ -210,18 +245,27 @@ def guardar_factura(request):
         print("Ingreso al primer if")
         body_unicode = request.body.decode('utf-8')
         body_data = json.loads(body_unicode)
+        print(body_data)
 
         cliente_id = body_data.get('cliente').get('dni')
+        subtotal = body_data.get('extraData').get('subtotal')
+        igv = body_data.get('extraData').get('impuesto_igv')
+        total = body_data.get('extraData').get('total_pagar')
         if cliente_id:
             print("Ingreso al iegundo if")
             try:
                 cliente_data = Cliente.objects.get(dni=cliente_id)
                 factura = Factura(cliente=cliente_data)
+                factura.subtotal = subtotal
+                factura.igv = igv
+                factura.total = total
+                print("insertando igv de: ",factura.igv, "deberia ser: ", igv)
                 factura.save()
                 for producto_data in body_data.get('productos'):
                     producto = Producto.objects.get(codigo=producto_data.get('codigo'))
                     print(producto)
-                    factura.productos.add(producto)
+                    FacturaProducto.objects.create(factura=factura, producto=producto, cantidad=producto_data.get('cantidad'), subtotal=producto_data.get('subtotal'))
+                    #factura.productos.add(producto)
                 return JsonResponse({'numero_factura': factura.id})
             except Cliente.DoesNotExist:
                 return JsonResponse({'error': 'Cliente no encontrado'}, status=404)

@@ -195,9 +195,12 @@
         console.log(cliente);
         var productos = obtenerProductos();
         console.log(productos);
+        var extraData = obtenerDatosExtra();
+        console.log(extraData);
         var datosFactura = {
             cliente: cliente,
-            productos: productos
+            productos: productos,
+            extraData: extraData
         };
 
         // Enviar los datos al servidor mediante una solicitud fetch
@@ -249,9 +252,9 @@
         });
         facturaHTML += '</ul>' +
                     '<h3>Totales:</h3>' +
-                    '<p><strong>Subtotal:</strong> ' + data.subtotal + '</p>' +
-                    '<p><strong>Impuesto IGV (18%):</strong> ' + data.impuesto_igv + '</p>' +
-                    '<p><strong>Total a Pagar:</strong> ' + data.total_pagar + '</p>';
+                    '<p id="subtotal"><strong>Subtotal:</strong> ' + data.subtotal + '</p>' +
+                    '<p id="igv"><strong>Impuesto IGV (18%):</strong> ' + data.impuesto_igv + '</p>' +
+                    '<p id="total"><strong>Total a Pagar:</strong> ' + data.total_pagar + '</p>';
 
         // Muestra la factura en una ventana emergente
         var facturaWindow = window.open('', 'Factura Generada', 'width=600,height=400');
@@ -267,7 +270,8 @@
             telefono: document.getElementById("telefono").value,
             correo: document.getElementById("correo").value
         };
-    }    function obtenerProductos() {
+    }    
+    function obtenerProductos() {
         var productos = [];
         var filas = document.querySelectorAll("#productosTable tbody tr");
         filas.forEach(function(fila) {
@@ -281,6 +285,14 @@
             productos.push(producto);
         });
         return productos;
+    }
+
+    function obtenerDatosExtra() {
+        return {
+            subtotal: parseFloat(document.getElementById("subtotal").innerText),
+            impuesto_igv: parseFloat(document.getElementById("impuesto_igv").innerText),
+            total_pagar: parseFloat(document.getElementById("total_pagar").innerText)
+        };
     }
 
     function agregarFilaProducto() {
