@@ -33,7 +33,7 @@ class Empresa(models.Model):
 class Factura(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
     fecha = models.DateField(auto_now_add=True)  # Campo para la fecha de la factura
-    numero_factura = models.CharField(max_length=20, unique=True)  # Campo para el número de factura
+    #numero_factura = models.CharField(max_length=20, unique=True)  # Campo para el número de factura
     productos = models.ManyToManyField(Producto)
 
     def __str__(self):
