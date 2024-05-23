@@ -3,30 +3,30 @@
 {% block content %}
 <h1>Información de la Empresa</h1>
 <p>Aquí puedes ver y editar detalles de la empresa emisora de las facturas.</p>
-<form method="POST" class="mt-4" enctype="multipart/form-data" id="empresa-form">
+<form method="POST" class="mt-4" enctype="multipart/form-data" onsubmit="return validarFormulario()">
     {% csrf_token %}
     {{ form.non_field_errors }}
     <div class="form-group">
         <label for="companyName">Nombre de la Empresa</label>
         <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingresa el nombre de la Empresa"
-        value="{{ empresa.nombre }}">
+        value="{{ empresa.nombre }}" required maxlength="50" oninput="limitarCaracteres(this, 50)">
+        <!-- Se establece el límite de caracteres a 50 -->
     </div>
     <div class="form-group">
         <label for="companyRUC">RUC</label>
         <input type="text" class="form-control" id="ruc" name="ruc" placeholder="Ingresa el RUC"
-        value="{{ empresa.ruc }}">
-        <small id="ruc-error" class="text-danger"></small>
+        value="{{ empresa.ruc }}" pattern="\d{11}" title="El RUC debe tener 11 números" required>
     </div>
     <div class="form-group">
         <label for="companyAddress">Dirección</label>
         <input type="text" class="form-control" id="direccion" name="direccion" placeholder="Ingresa la dirección"
-        value="{{ empresa.direccion }}">
+        value="{{ empresa.direccion }}" required maxlength="100" oninput="limitarCaracteres(this, 100)">
+        <!-- Se establece el límite de caracteres a 100 -->
     </div>
     <div class="form-group">
         <label for="companyPhone">Teléfono</label>
-        <input type="text" class="form-control" id="telefono" name="telefono" placeholder="Ingresa el número telefonico"
-        value="{{ empresa.telefono }}">        
-        <small id="telefono-error" class="text-danger"></small>
+        <input type="text" class="form-control" id="telefono" name="telefono" placeholder="Ingresa el número telefónico"
+        value="{{ empresa.telefono }}" pattern="\d{9}" title="El teléfono debe tener 9 números" required>
     </div>
     <div class="form-group">
         <label for="companyImage">Imagen representativa</label>
@@ -34,58 +34,38 @@
     </div>
     <button type="submit" class="btn btn-primary">Actualizar</button>
 </form>
+
 <script>
-    document.getElementById('empresa-form').addEventListener('submit', function (event) {
-        let telefonoInput = document.getElementById('telefono').value.trim();
-        let telefonoError = document.getElementById('telefono-error');
-        let rucInput = document.getElementById('ruc').value.trim();
-        let rucError = document.getElementById('ruc-error');
+function validarFormulario() {
+    const nombre = document.getElementById('nombre').value.trim();
+    const ruc = document.getElementById('ruc').value.trim();
+    const direccion = document.getElementById('direccion').value.trim();
+    const telefono = document.getElementById('telefono').value.trim();
+    const patronRuc = /^\d{11}$/;
+    const patronTelefono = /^\d{9}$/;
 
-        let valid = true;
-        let errorMessage = '';
+    if (nombre === "" || ruc === "" || direccion === "" || telefono === "") {
+        alert('Todos los campos son obligatorios.');
+        return false;
+    }
 
-        if (telefonoInput.length !== 9 || isNaN(telefonoInput)) {
-            telefonoError.textContent = 'El teléfono debe ser un número de 9 dígitos.';
-            errorMessage += 'Teléfono incorrecto: debe ser un número de 9 dígitos.\n';
-            valid = false;
-        } else {
-            telefonoError.textContent = '';
-        }
+    if (!patronRuc.test(ruc)) {
+        alert('El RUC debe tener 11 números.');
+        return false;
+    }
 
-        if (rucInput.length !== 11 || isNaN(rucInput)) {
-            rucError.textContent = 'El RUC debe ser un número de 11 dígitos.';
-            errorMessage += 'RUC incorrecto: debe ser un número de 11 dígitos.\n';
-            valid = false;
-        } else {
-            rucError.textContent = '';
-        }
+    if (!patronTelefono.test(telefono)) {
+        alert('El teléfono debe tener 9 números.');
+        return false;
+    }
 
-        if (!valid) {
-            event.preventDefault();
-            alert('No se actualizaron los datos porque no se cumplieron los siguientes campos:\n' + errorMessage);
-        }
-    });
+    return true;
+}
 
-    document.getElementById('telefono').addEventListener('input', function () {
-        let telefonoInput = this.value.trim();
-        let telefonoError = document.getElementById('telefono-error');
-
-        if (telefonoInput.length !== 9 || isNaN(telefonoInput)) {
-            telefonoError.textContent = 'El teléfono debe ser un número de 9 dígitos.';
-        } else {
-            telefonoError.textContent = '';
-        }
-    });
-
-    document.getElementById('ruc').addEventListener('input', function () {
-        let rucInput = this.value.trim();
-        let rucError = document.getElementById('ruc-error');
-
-        if (rucInput.length !== 11 || isNaN(rucInput)) {
-            rucError.textContent = 'El RUC debe ser un número de 11 dígitos.';
-        } else {
-            rucError.textContent = '';
-        }
-    });
+function limitarCaracteres(input, maxLength) {
+    if (input.value.length > maxLength) {
+        input.value = input.value.slice(0, maxLength);
+    }
+}
 </script>
 {% endblock %}

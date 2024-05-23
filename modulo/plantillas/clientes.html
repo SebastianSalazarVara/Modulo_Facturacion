@@ -3,7 +3,7 @@
 {% block content %}
 <h1 class="text-center">Clientes</h1>
 
-<form method="POST" class="mt-4" id="cliente-form">  <!-- Usar método POST para editar o agregar -->
+<form method="POST" class="mt-4" id="cliente-form" onsubmit="return validarFormulario()"> <!-- Usar método POST para editar o agregar -->
     {% csrf_token %}
     {{ form.non_field_errors }}
 
@@ -11,7 +11,7 @@
     <div class="form-group">
         <label for="dni">DNI</label>
         <input type="text" class="form-control" id="dni" name="dni" placeholder="Ingrese el DNI" 
-               value="{{ form.dni.value }}">
+               value="{{ form.dni.value }}" pattern="\d{8}" title="El DNI debe ser un número de 8 dígitos" required>
         <small id="dni-error" class="text-danger"></small>
     </div>
     
@@ -19,22 +19,23 @@
     <div class="form-group">
         <label for="nombre">Nombre</label>
         <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingrese el nombre" 
-               value="{{ form.nombre.value }}">
-        <small id="nombre-error" class="text-danger"></small>
+               value="{{ form.nombre.value }}" required maxlength="50" oninput="limitarCaracteres(this, 50)">
+        <!-- Se establece el límite de caracteres a 50 -->
     </div>
     
     <!-- Campo para Dirección -->
     <div class="form-group">
         <label for="direccion">Dirección</label>
         <input type="text" class="form-control" id="direccion" name="direccion" placeholder="Ingrese la dirección" 
-               value="{{ form.direccion.value }}">
+               value="{{ form.direccion.value }}" required maxlength="100" oninput="limitarCaracteres(this, 100)">
+        <!-- Se establece el límite de caracteres a 100 -->
     </div>
     
     <!-- Campo para Teléfono -->
     <div class="form-group">
         <label for="telefono">Teléfono</label>
         <input type="text" class="form-control" id="telefono" name="telefono" placeholder="Ingrese el teléfono" 
-            value="{{ form.telefono.value }}">
+            value="{{ form.telefono.value }}" pattern="\d{9}" title="El teléfono debe ser un número de 9 dígitos" required>
         <small id="telefono-error" class="text-danger"></small>
     </div>
     
@@ -42,7 +43,8 @@
     <div class="form-group">
         <label for="correo">Correo Electrónico</label>
         <input type="email" class="form-control" id="correo" name="correo" placeholder="Ingrese el correo electrónico" 
-               value="{{ form.correo.value }}">
+               value="{{ form.correo.value }}" required maxlength="100" oninput="limitarCaracteres(this, 100)">
+        <!-- Se establece el límite de caracteres a 100 -->
     </div>
 
     <!-- Botones diferentes según el modo -->
@@ -86,43 +88,44 @@
 </table>
 
 <script>
-    // Validar DNI
-    document.getElementById('dni').addEventListener('input', function () {
-        let dniInput = this.value.trim();
-        let dniError = document.getElementById('dni-error');
+    function validarFormulario() {
+        const dni = document.getElementById('dni').value.trim();
+        const nombre = document.getElementById('nombre').value.trim();
+        const direccion = document.getElementById('direccion').value.trim();
+        const telefono = document.getElementById('telefono').value.trim();
+        const correo = document.getElementById('correo').value.trim();
 
-        if (dniInput.length !== 8 || isNaN(dniInput)) {
-            dniError.textContent = 'El DNI debe ser un número de 8 dígitos.';
-        } else {
-            dniError.textContent = '';
-        }
-    });
-</script>
-<script>
-    // Validar Teléfono
-    document.getElementById('telefono').addEventListener('input', function () {
-        let telefonoInput = this.value.trim();
-        let telefonoError = document.getElementById('telefono-error');
+        const patronDNI = /^\d{8}$/;
+        const patronTelefono = /^\d{9}$/;
+        const patronCorreo = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-        if (telefonoInput.length !== 9 || isNaN(telefonoInput)) {
-            telefonoError.textContent = 'El teléfono debe ser un número de 9 dígitos.';
-        } else {
-            telefonoError.textContent = '';
+        if (dni === "" || nombre === "" || direccion === "" || telefono === "" || correo === "") {
+            alert('Todos los campos son obligatorios.');
+            return false;
         }
-    });
-</script>
-<script>
-    // Validar Nombre
-    document.getElementById('nombre').addEventListener('input', function () {
-        let nombreInput = this.value.trim();
-        let nombreError = document.getElementById('nombre-error');
-        let nombreRegex = /^[a-zA-Z\s]+$/;
 
-        if (!nombreRegex.test(nombreInput)) {
-            nombreError.textContent = 'El nombre solo puede contener letras y espacios.';
-        } else {
-            nombreError.textContent = '';
+        if (!patronDNI.test(dni)) {
+            alert('El DNI debe ser un número de 8 dígitos.');
+            return false;
         }
-    });
+
+        if (!patronTelefono.test(telefono)) {
+            alert('El teléfono debe ser un número de 9 dígitos.');
+            return false;
+        }
+
+        if (!patronCorreo.test(correo)) {
+            alert('Debe ser un correo electrónico válido.');
+            return false;
+        }
+
+        return true;
+    }
+
+    function limitarCaracteres(input, maxLength) {
+        if (input.value.length > maxLength) {
+            input.value = input.value.slice(0, maxLength);
+        }
+    }
 </script>
 {% endblock %}

@@ -19,31 +19,31 @@
                 <label for="dni">DNI</label>
                 <input type="text" class="form-control" name="dni" id="dni" 
                        placeholder="Ingrese el DNI del cliente"
-                       required onchange="buscarClientePorDNI(this.value)">
+                       required onchange="validarDNI(this.value)">
             </div>
 
             <!-- Campo para Nombre -->
             <div class="form-group">
                 <label for="nombre">Nombre</label>
-                <input type="text" class="form-control" name="nombre" id="nombre" placeholder="Ingrese el nombre">
+                <input type="text" class="form-control" name="nombre" id="nombre" placeholder="Ingrese el nombre" readonly>
             </div>
 
             <!-- Campo para Dirección -->
             <div class="form-group">
                 <label for="direccion">Dirección</label>
-                <input type="text" class="form-control" name="direccion" id="direccion" placeholder="Ingrese la dirección">
+                <input type="text" class="form-control" name="direccion" id="direccion" placeholder="Ingrese la dirección" readonly>
             </div>
 
             <!-- Campo para Teléfono -->
             <div class="form-group">
                 <label for="telefono">Teléfono</label>
-                <input type="text" class="form-control" name="telefono" id="telefono" placeholder="Ingrese el teléfono">
+                <input type="text" class="form-control" name="telefono" id="telefono" placeholder="Ingrese el teléfono" readonly>
             </div>
 
             <!-- Campo para Correo Electrónico -->
             <div class="form-group">
                 <label for="correo">Correo Electrónico</label>
-                <input type="email" class="form-control" name="correo" id="correo" placeholder="Ingrese el correo electrónico">
+                <input type="email" class="form-control" name="correo" id="correo" placeholder="Ingrese el correo electrónico" readonly>
             </div>
         </form>
     </div>
@@ -63,33 +63,30 @@
             <p>No hay imagen disponible</p>
         {% endif %}
     </div>
-
-
-
-
 </div>
+
 <!-- Tabla para Ingresar Productos -->
 <div class="mt-4">
     <h2>Productos</h2>
     <form method="POST" id="productForm">
-        {% csrf_token %}<table class="table table-striped" id="productosTable">
-        <thead>
-            <tr>
-                <th>Código</th>
-                <th>Nombre del Producto</th>
-                <th>Precio Unitario</th>
-                <th>Cantidad</th>
-                <th>Subtotal</th>  
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Las filas se agregarán dinámicamente aquí -->
-        </tbody>
-    </table>
-    <button type="button" class="btn btn-secondary" onclick="agregarFilaProducto()">Agregar Producto</button>
+        {% csrf_token %}
+        <table class="table table-striped" id="productosTable">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Nombre del Producto</th>
+                    <th>Precio Unitario</th>
+                    <th>Cantidad</th>
+                    <th>Subtotal</th>  
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Las filas se agregarán dinámicamente aquí -->
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-secondary" onclick="agregarFilaProducto()">Agregar Producto</button>
     </form>
 </div>
-
 
 <!-- Totalización -->
 <div class="mt-4">
@@ -100,15 +97,14 @@
 
     <!-- Botón para generar la factura -->
     <button type="button" class="btn btn-primary" onclick="guardarFactura()">Generar Factura</button>
-
 </div>
+
 <script>
     document.getElementById("nombre_empresa").innerText = "{{ empresa.nombre }}";
     document.getElementById("ruc_empresa").innerText = "{{ empresa.ruc }}";
     document.getElementById("direccion_empresa").innerText = "{{ empresa.direccion }}";
     document.getElementById("telefono_empresa").innerText = "{{ empresa.telefono }}";
     document.getElementById("imagen_empresa").src = "{{ empresa.imagen.url }}";
-
 
     function buscarClientePorDNI(dni) {
         fetch('', {
@@ -130,7 +126,16 @@
             console.error('Error:', error);
         });
     }
-    
+
+    function validarDNI(dni) {
+        var dniRegExp = /^[0-9]{8}$/; 
+        if (!dniRegExp.test(dni)) {
+            alert("El DNI debe contener solo 8 números.");
+            document.getElementById("dni").value = ""; 
+        } else {
+            buscarClientePorDNI(dni); 
+        }
+    }
     function actualizarProducto(selectElement) {
         var codigoProducto = selectElement.value;
         var row = selectElement.closest('tr');
@@ -173,7 +178,7 @@
     function calcularTotales() {
         var subtotales = document.querySelectorAll(".subtotal_producto");
         var subtotal = 0;
-        
+
         subtotales.forEach(function(element) {
             subtotal += parseFloat(element.value || 0); // Utiliza element.value para obtener el valor del subtotal
         });
@@ -187,7 +192,6 @@
         document.getElementById("impuesto_igv").innerText = impuestoIGV.toFixed(2);
         document.getElementById("total_pagar").innerText = totalPagar.toFixed(2);
     }
-    
 
     // Función para generar la factura en formato HTML
     function guardarFactura() {
@@ -234,33 +238,32 @@
 
     function mostrarFactura(data) {
         var facturaHTML = '<h2>Factura Generada</h2>' +
-                        '<p><strong>Número de Factura:</strong> ' + data.numero_factura + '</p>' +
-                        '<h3>Datos del Cliente:</h3>' +
-                        '<p><strong>Nombre:</strong> ' + data.cliente.nombre + '</p>' +
-                        '<p><strong>Dirección:</strong> ' + data.cliente.direccion + '</p>' +
-                        '<p><strong>Teléfono:</strong> ' + data.cliente.telefono + '</p>' +
-                        '<p><strong>Correo Electrónico:</strong> ' + data.cliente.correo + '</p>' +
-                        '<h3>Datos de la Empresa:</h3>' +
-                        '<p><strong>Nombre:</strong> ' + data.empresa.nombre + '</p>' +
-                        '<p><strong>RUC:</strong> ' + data.empresa.ruc + '</p>' +
-                        '<p><strong>Dirección:</strong> ' + data.empresa.direccion + '</p>' +
-                        '<p><strong>Teléfono:</strong> ' + data.empresa.telefono + '</p>' +
-                        '<h3>Productos:</h3>' +
-                        '<ul>';
+                          '<p><strong>Número de Factura:</strong> ' + data.numero_factura + '</p>' +
+                          '<h3>Datos del Cliente:</h3>' +
+                          '<p><strong>Nombre:</strong> ' + data.cliente.nombre + '</p>' +
+                          '<p><strong>Dirección:</strong> ' + data.cliente.direccion + '</p>' +
+                          '<p><strong>Teléfono:</strong> ' + data.cliente.telefono + '</p>' +
+                          '<p><strong>Correo Electrónico:</strong> ' + data.cliente.correo + '</p>' +
+                          '<h3>Datos de la Empresa:</h3>' +
+                          '<p><strong>Nombre:</strong> ' + data.empresa.nombre + '</p>' +
+                          '<p><strong>RUC:</strong> ' + data.empresa.ruc + '</p>' +
+                          '<p><strong>Dirección:</strong> ' + data.empresa.direccion + '</p>' +
+                          '<p><strong>Teléfono:</strong> ' + data.empresa.telefono + '</p>' +
+                          '<h3>Productos:</h3>' +
+                          '<ul>';
         data.productos.forEach(function(producto) {
             facturaHTML += '<li>' + producto.nombre + ': ' + producto.cantidad + ' x ' + producto.precio_unitario + '</li>';
         });
         facturaHTML += '</ul>' +
-                    '<h3>Totales:</h3>' +
-                    '<p id="subtotal"><strong>Subtotal:</strong> ' + data.subtotal + '</p>' +
-                    '<p id="igv"><strong>Impuesto IGV (18%):</strong> ' + data.impuesto_igv + '</p>' +
-                    '<p id="total"><strong>Total a Pagar:</strong> ' + data.total_pagar + '</p>';
+                       '<h3>Totales:</h3>' +
+                       '<p id="subtotal"><strong>Subtotal:</strong> ' + data.subtotal + '</p>' +
+                       '<p id="igv"><strong>Impuesto IGV (18%):</strong> ' + data.impuesto_igv + '</p>' +
+                       '<p id="total"><strong>Total a Pagar:</strong> ' + data.total_pagar + '</p>';
 
         // Muestra la factura en una ventana emergente
         var facturaWindow = window.open('', 'Factura Generada', 'width=600,height=400');
         facturaWindow.document.write(facturaHTML);
     }
-
 
     function obtenerDatosCliente() {
         return {
@@ -271,6 +274,7 @@
             correo: document.getElementById("correo").value
         };
     }    
+
     function obtenerProductos() {
         var productos = [];
         var filas = document.querySelectorAll("#productosTable tbody tr");
@@ -313,6 +317,5 @@
         $('#productosTable tbody').append(newRow);
     }
 </script>
-
 
 {% endblock %}
