@@ -20,6 +20,7 @@
         <label for="nombre">Nombre</label>
         <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingrese el nombre" 
                value="{{ form.nombre.value }}">
+        <small id="nombre-error" class="text-danger"></small>
     </div>
     
     <!-- Campo para Dirección -->
@@ -107,6 +108,20 @@
             telefonoError.textContent = 'El teléfono debe ser un número de 9 dígitos.';
         } else {
             telefonoError.textContent = '';
+        }
+    });
+</script>
+<script>
+    // Validar Nombre
+    document.getElementById('nombre').addEventListener('input', function () {
+        let nombreInput = this.value.trim();
+        let nombreError = document.getElementById('nombre-error');
+        let nombreRegex = /^[a-zA-Z\s]+$/;
+
+        if (!nombreRegex.test(nombreInput)) {
+            nombreError.textContent = 'El nombre solo puede contener letras y espacios.';
+        } else {
+            nombreError.textContent = '';
         }
     });
 </script>

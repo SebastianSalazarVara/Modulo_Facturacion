@@ -3,7 +3,7 @@
 {% block content %}
 <h1>Información de la Empresa</h1>
 <p>Aquí puedes ver y editar detalles de la empresa emisora de las facturas.</p>
-<form method="POST" class="mt-4" enctype="multipart/form-data">
+<form method="POST" class="mt-4" enctype="multipart/form-data" id="empresa-form">
     {% csrf_token %}
     {{ form.non_field_errors }}
     <div class="form-group">
@@ -15,6 +15,7 @@
         <label for="companyRUC">RUC</label>
         <input type="text" class="form-control" id="ruc" name="ruc" placeholder="Ingresa el RUC"
         value="{{ empresa.ruc }}">
+        <small id="ruc-error" class="text-danger"></small>
     </div>
     <div class="form-group">
         <label for="companyAddress">Dirección</label>
@@ -24,7 +25,8 @@
     <div class="form-group">
         <label for="companyPhone">Teléfono</label>
         <input type="text" class="form-control" id="telefono" name="telefono" placeholder="Ingresa el número telefonico"
-        value="{{ empresa.telefono }}">
+        value="{{ empresa.telefono }}">        
+        <small id="telefono-error" class="text-danger"></small>
     </div>
     <div class="form-group">
         <label for="companyImage">Imagen representativa</label>
@@ -32,4 +34,58 @@
     </div>
     <button type="submit" class="btn btn-primary">Actualizar</button>
 </form>
+<script>
+    document.getElementById('empresa-form').addEventListener('submit', function (event) {
+        let telefonoInput = document.getElementById('telefono').value.trim();
+        let telefonoError = document.getElementById('telefono-error');
+        let rucInput = document.getElementById('ruc').value.trim();
+        let rucError = document.getElementById('ruc-error');
+
+        let valid = true;
+        let errorMessage = '';
+
+        if (telefonoInput.length !== 9 || isNaN(telefonoInput)) {
+            telefonoError.textContent = 'El teléfono debe ser un número de 9 dígitos.';
+            errorMessage += 'Teléfono incorrecto: debe ser un número de 9 dígitos.\n';
+            valid = false;
+        } else {
+            telefonoError.textContent = '';
+        }
+
+        if (rucInput.length !== 11 || isNaN(rucInput)) {
+            rucError.textContent = 'El RUC debe ser un número de 11 dígitos.';
+            errorMessage += 'RUC incorrecto: debe ser un número de 11 dígitos.\n';
+            valid = false;
+        } else {
+            rucError.textContent = '';
+        }
+
+        if (!valid) {
+            event.preventDefault();
+            alert('No se actualizaron los datos porque no se cumplieron los siguientes campos:\n' + errorMessage);
+        }
+    });
+
+    document.getElementById('telefono').addEventListener('input', function () {
+        let telefonoInput = this.value.trim();
+        let telefonoError = document.getElementById('telefono-error');
+
+        if (telefonoInput.length !== 9 || isNaN(telefonoInput)) {
+            telefonoError.textContent = 'El teléfono debe ser un número de 9 dígitos.';
+        } else {
+            telefonoError.textContent = '';
+        }
+    });
+
+    document.getElementById('ruc').addEventListener('input', function () {
+        let rucInput = this.value.trim();
+        let rucError = document.getElementById('ruc-error');
+
+        if (rucInput.length !== 11 || isNaN(rucInput)) {
+            rucError.textContent = 'El RUC debe ser un número de 11 dígitos.';
+        } else {
+            rucError.textContent = '';
+        }
+    });
+</script>
 {% endblock %}
